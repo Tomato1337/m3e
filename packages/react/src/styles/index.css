@@ -1,0 +1,17 @@
+/*
+ * @m3e/react styles: tokens, base, components, utilities — each in its `m3e.*` cascade layer.
+ * With Tailwind, declare `@layer theme, base, m3e, components, utilities;` before importing both,
+ * so preflight sits below the kit and utilities win over it.
+ */
+@import '@m3e/tokens/tokens.css';
+@import './base.css';
+@import './motion.css';
+@import '../icon/icon.css';
+@import '../button/button.css';
+@import '../tooltip/tooltip.css';
+@import '../dialog/dialog.css';
+@import '../menu/menu.css';
+@import '../snackbar/snackbar.css';
+@import '../chip/chip.css';
+@import '../switch/switch.css';
+@import '../progress/progress.css';

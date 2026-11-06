@@ -1,0 +1,81 @@
+/*
+ * Plain tooltip from `data-tip` (IconButton sets it from its label), shown after 500 ms of hover or
+ * on keyboard focus. Entry is a delayed keyframe animation (WebKit ignores @starting-style on
+ * pseudo-elements); exit fades out while `display` is held by an allow-discrete transition, so it no
+ * longer vanishes in one frame. Generated text is hidden from the accessibility tree (the host's
+ * aria-label already names it).
+ */
+@layer m3e.components {
+  [data-tip] { position: relative; }
+
+  [data-tip]::after {
+    content: attr(data-tip);
+    content: attr(data-tip) / '';
+    display: none;
+    position: absolute;
+    inset: auto auto calc(100% + 6px) 50%;
+    translate: -50% 0;
+    z-index: 1000;
+    box-sizing: border-box;
+    max-inline-size: 320px;
+    padding: 4px 8px;
+    white-space: nowrap;
+    pointer-events: none;
+    background: var(--md-sys-color-inverse-surface);
+    color: var(--md-sys-color-inverse-on-surface);
+    border-radius: var(--md-sys-shape-corner-extra-small);
+    font-family: var(--md-sys-typescale-body-small-font);
+    font-size: var(--md-sys-typescale-body-small-size);
+    line-height: var(--md-sys-typescale-body-small-line-height);
+    font-weight: var(--md-sys-typescale-body-small-weight);
+    letter-spacing: var(--md-sys-typescale-body-small-tracking);
+    opacity: 0;
+    transition-property: opacity, display;
+    transition-duration: var(--md-sys-motion-duration-short2);
+    transition-timing-function: linear;
+    transition-behavior: allow-discrete;
+  }
+  [data-tip]:where(:hover, :focus-visible)::after {
+    display: block;
+    opacity: 1;
+    transition: none;
+    animation: m3e-tip-in var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard-decelerate) 500ms backwards;
+  }
+  [data-tip]:focus-visible::after { animation-delay: 0ms; }
+
+  /* Hosts near a window edge: the tip goes below, or beside. */
+  [data-tip][data-tip-pos='bottom']::after { inset: calc(100% + 6px) auto auto 50%; }
+  [data-tip][data-tip-pos='bottom-start']::after { inset: calc(100% + 6px) auto auto 0; translate: none; }
+  [data-tip][data-tip-pos='bottom-end']::after { inset: calc(100% + 6px) 0 auto auto; translate: none; }
+  [data-tip][data-tip-pos='left']::after { inset: 50% calc(100% + 6px) auto auto; translate: 0 -50%; }
+  [data-tip][data-tip-pos='right']::after { inset: 50% auto auto calc(100% + 6px); translate: 0 -50%; }
+
+  /*
+   * With CSS Anchor Positioning the tip is fixed to the viewport and anchored to its own host, so an
+   * `overflow: hidden` ancestor cannot cut it off, and position-try flips it away from window edges.
+   * The unique anchor name comes from useTipAnchor().
+   */
+  @supports (anchor-name: --tip) and (position-anchor: --tip) and (position-area: top) {
+    [data-tip] { anchor-name: var(--tip-anchor); }
+    [data-tip]::after,
+    [data-tip][data-tip-pos]::after {
+      position: fixed;
+      inset: auto;
+      translate: none;
+      position-anchor: var(--tip-anchor);
+      position-area: top;
+      position-try-fallbacks: flip-block;
+      position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline;
+      margin: 0 0 6px;
+    }
+    [data-tip][data-tip-pos='bottom']::after { position-area: bottom; margin: 6px 0 0; }
+    [data-tip][data-tip-pos='left']::after { position-area: left; margin: 0 6px 0 0; }
+    [data-tip][data-tip-pos='right']::after { position-area: right; margin: 0 0 0 6px; }
+    [data-tip][data-tip-pos='bottom-start']::after { position-area: bottom span-right; justify-self: start; margin: 6px 0 0; }
+    [data-tip][data-tip-pos='bottom-end']::after { position-area: bottom span-left; justify-self: end; margin: 6px 0 0; }
+  }
+}
+
+@keyframes m3e-tip-in {
+  from { opacity: 0; }
+}

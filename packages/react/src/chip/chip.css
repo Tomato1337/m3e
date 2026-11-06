@@ -1,0 +1,102 @@
+/*
+ * Filter chip (Chip.tsx): 32 px, small corners. The check mark is always rendered and grows in or
+ * out with the selection, so deselecting animates instead of the label jumping back.
+ */
+@layer m3e.components {
+  .m3e-chip {
+    --m3e-chip-content: var(--md-sys-color-on-surface-variant);
+
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    box-sizing: border-box;
+    block-size: 32px;
+    max-inline-size: 100%;
+    margin: 0;
+    padding: 0 12px;
+    border: 1px solid var(--md-sys-color-outline);
+    border-radius: var(--md-sys-shape-corner-small);
+    background-color: transparent;
+    color: var(--m3e-chip-content);
+    font-family: var(--md-sys-typescale-label-large-font);
+    font-size: var(--md-sys-typescale-label-large-size);
+    line-height: var(--md-sys-typescale-label-large-line-height);
+    font-weight: var(--md-sys-typescale-label-large-weight);
+    letter-spacing: var(--md-sys-typescale-label-large-tracking);
+    white-space: nowrap;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition-property: background-color, border-color, color;
+    transition-duration: var(--md-sys-motion-spring-default-effects-duration);
+    transition-timing-function: var(--md-sys-motion-spring-default-effects);
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: inherit;
+      background: var(--m3e-chip-content);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--md-sys-motion-spring-fast-effects-duration) var(--md-sys-motion-spring-fast-effects);
+    }
+    &:where(:not(:disabled)) {
+      &:hover::before { opacity: var(--md-sys-state-hover-state-layer-opacity); }
+      &:focus-visible::before { opacity: var(--md-sys-state-focus-state-layer-opacity); }
+      &:active::before { opacity: var(--md-sys-state-pressed-state-layer-opacity); }
+    }
+
+    & > [data-part='check'] {
+      display: inline-flex;
+      justify-content: center;
+      overflow: hidden;
+      inline-size: 0;
+      margin-inline: 0;
+      opacity: 0;
+      scale: 0.6;
+      transition-property: inline-size, margin, scale, opacity;
+      transition-duration:
+        var(--md-sys-motion-spring-fast-spatial-duration),
+        var(--md-sys-motion-spring-fast-spatial-duration),
+        var(--md-sys-motion-spring-fast-spatial-duration),
+        var(--md-sys-motion-spring-fast-effects-duration);
+      transition-timing-function:
+        var(--md-sys-motion-spring-fast-spatial),
+        var(--md-sys-motion-spring-fast-spatial),
+        var(--md-sys-motion-spring-fast-spatial),
+        var(--md-sys-motion-spring-fast-effects);
+    }
+    & > [data-part='label'] {
+      min-inline-size: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    &[aria-pressed='true'] {
+      --m3e-chip-content: var(--md-sys-color-on-secondary-container);
+      border-color: transparent;
+      background-color: var(--md-sys-color-secondary-container);
+
+      & > [data-part='check'] {
+        inline-size: 18px;
+        margin-inline: -4px 6px;
+        opacity: 1;
+        scale: 1;
+      }
+    }
+
+    &:disabled {
+      cursor: default;
+      --m3e-chip-content: color-mix(in srgb, var(--md-sys-color-on-surface) var(--m3e-disabled-content-opacity), transparent);
+      border-color: color-mix(in srgb, var(--md-sys-color-on-surface) var(--m3e-disabled-container-opacity), transparent);
+      &[aria-pressed='true'] {
+        background-color: color-mix(in srgb, var(--md-sys-color-on-surface) var(--m3e-disabled-container-opacity), transparent);
+      }
+    }
+
+    /* Reduced motion: the mark just fades; the width change is instant. */
+    @media (prefers-reduced-motion: reduce) {
+      & > [data-part='check'] { transition-duration: 0s, 0s, 0s, var(--md-sys-motion-spring-fast-effects-duration); }
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "noEmit": false,
+    "emitDeclarationOnly": true,
+    "outDir": "../../node_modules/.tmp/tokens",
+    "tsBuildInfoFile": "../../node_modules/.tmp/tokens.tsbuildinfo",
+    "types": ["node"]
+  },
+  "include": ["src", "scripts", "test"]
+}

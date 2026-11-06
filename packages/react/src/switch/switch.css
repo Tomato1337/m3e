@@ -1,0 +1,105 @@
+/*
+ * Switch (Switch.tsx). The track is the checkbox itself (`appearance: none`), the handle its
+ * ::before, so label association, keyboard and form value stay native; SwitchIndicator draws the
+ * same picture on a span. M3: 52×32 track; handle 16 px off, 24 px on, 28 px while pressed — one
+ * 28 px circle scaled, so the change runs on the compositor. The handle travels on a spatial
+ * spring; colours take the effects spring. Reduced motion keeps only the colour change.
+ */
+@layer m3e.components {
+  .m3e-switch {
+    --m3e-switch-track: var(--md-sys-color-surface-container-highest);
+    --m3e-switch-outline: var(--md-sys-color-outline);
+    --m3e-switch-handle: var(--md-sys-color-outline);
+    --m3e-switch-handle-scale: 0.5714;
+    --m3e-switch-handle-x: 0px;
+
+    appearance: none;
+    position: relative;
+    display: inline-block;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    inline-size: 52px;
+    block-size: 32px;
+    margin: 0;
+    border: 2px solid var(--m3e-switch-outline);
+    border-radius: 16px;
+    background-color: var(--m3e-switch-track);
+    vertical-align: middle;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition-property: background-color, border-color;
+    transition-duration: var(--md-sys-motion-spring-default-effects-duration);
+    transition-timing-function: var(--md-sys-motion-spring-default-effects);
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset-block-start: 0;
+      inset-inline-start: 0;
+      inline-size: 28px;
+      block-size: 28px;
+      border-radius: 50%;
+      background-color: var(--m3e-switch-handle);
+      translate: var(--m3e-switch-handle-x) 0;
+      scale: var(--m3e-switch-handle-scale);
+      transition-property: translate, scale, background-color;
+      transition-duration:
+        var(--md-sys-motion-spring-fast-spatial-duration),
+        var(--md-sys-motion-spring-fast-spatial-duration),
+        var(--md-sys-motion-spring-default-effects-duration);
+      transition-timing-function:
+        var(--md-sys-motion-spring-fast-spatial),
+        var(--md-sys-motion-spring-fast-spatial),
+        var(--md-sys-motion-spring-default-effects);
+    }
+
+    &:is(:checked, [data-checked]) {
+      --m3e-switch-track: var(--md-sys-color-primary);
+      --m3e-switch-outline: var(--md-sys-color-primary);
+      --m3e-switch-handle: var(--md-sys-color-on-primary);
+      --m3e-switch-handle-scale: 0.8571;
+      --m3e-switch-handle-x: 20px;
+    }
+    &:where(:not(:disabled)) {
+      &:hover { --m3e-switch-handle: var(--md-sys-color-on-surface-variant); }
+      &:is(:checked, [data-checked]):hover { --m3e-switch-handle: var(--md-sys-color-primary-container); }
+      &:active { --m3e-switch-handle-scale: 1; }
+    }
+    /* A row that is the control (menuitemcheckbox) presses its indicator too. */
+    :where(:active:not(:disabled)) > &:not(input) { --m3e-switch-handle-scale: 1; }
+
+    &:disabled {
+      cursor: default;
+      --m3e-switch-track: color-mix(in srgb, var(--md-sys-color-surface-container-highest) var(--m3e-disabled-container-opacity), transparent);
+      --m3e-switch-outline: color-mix(in srgb, var(--md-sys-color-on-surface) var(--m3e-disabled-container-opacity), transparent);
+      --m3e-switch-handle: color-mix(in srgb, var(--md-sys-color-on-surface) var(--m3e-disabled-content-opacity), transparent);
+      &:checked {
+        --m3e-switch-track: color-mix(in srgb, var(--md-sys-color-on-surface) var(--m3e-disabled-container-opacity), transparent);
+        --m3e-switch-outline: transparent;
+        --m3e-switch-handle: var(--md-sys-color-surface);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      &::before { transition-duration: 0s, 0s, var(--md-sys-motion-spring-default-effects-duration); }
+    }
+  }
+
+  /* Label + switch on one row; the whole row toggles. */
+  .m3e-switch-field {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    cursor: pointer;
+    font-family: var(--md-sys-typescale-body-medium-font);
+    font-size: var(--md-sys-typescale-body-medium-size);
+    line-height: var(--md-sys-typescale-body-medium-line-height);
+    letter-spacing: var(--md-sys-typescale-body-medium-tracking);
+
+    &[data-disabled] {
+      cursor: default;
+      color: color-mix(in srgb, var(--md-sys-color-on-surface) var(--m3e-disabled-content-opacity), transparent);
+    }
+  }
+}

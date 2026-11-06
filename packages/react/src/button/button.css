@@ -1,0 +1,261 @@
+@layer m3e.components {
+  /* ---- Icon button ------------------------------------------------------------------------ */
+  .m3e-icon-button {
+    --m3e-icon-button-container: transparent;
+    --m3e-icon-button-content: var(--md-sys-color-on-surface-variant);
+    --m3e-icon-button-state: var(--md-sys-color-on-surface);
+    --m3e-icon-button-radius: 20px;
+    --m3e-icon-button-press-radius: var(--m3e-icon-button-radius);
+    --m3e-icon-button-size: 40px;
+    --m3e-icon-button-width: var(--m3e-icon-button-size);
+
+    position: relative;
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    inline-size: var(--m3e-icon-button-width);
+    block-size: var(--m3e-icon-button-size);
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: var(--m3e-icon-button-content);
+    /* Static radius: only for the focus ring. The morph runs on the parts below. */
+    border-radius: var(--m3e-icon-button-radius);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+
+    & > :is([data-part='surface'], [data-part='state']) {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      border-radius: var(--m3e-icon-button-radius);
+      transition:
+        border-radius var(--md-sys-motion-spring-default-spatial-duration) var(--md-sys-motion-spring-default-spatial),
+        scale var(--md-sys-motion-spring-fast-spatial-duration) var(--md-sys-motion-spring-fast-spatial),
+        opacity var(--md-sys-motion-spring-fast-effects-duration) var(--md-sys-motion-spring-fast-effects),
+        background-color var(--md-sys-motion-spring-default-effects-duration) var(--md-sys-motion-spring-default-effects);
+    }
+    & > [data-part='surface'] { background-color: var(--m3e-icon-button-container); }
+    & > [data-part='state'] { background-color: var(--m3e-icon-button-state); opacity: 0; }
+    & > [data-part='icon'] {
+      position: relative;
+      display: inline-flex;
+      transition: scale var(--md-sys-motion-spring-fast-spatial-duration) var(--md-sys-motion-spring-fast-spatial);
+    }
+
+    &:where(:not(:disabled)) {
+      &:hover > [data-part='state'] { opacity: var(--md-sys-state-hover-state-layer-opacity); }
+      &:focus-visible > [data-part='state'] { opacity: var(--md-sys-state-focus-state-layer-opacity); }
+      &:active > [data-part='state'] { opacity: var(--md-sys-state-pressed-state-layer-opacity); }
+      &:active > :is([data-part='surface'], [data-part='state']) { border-radius: var(--m3e-icon-button-press-radius); }
+      @media (prefers-reduced-motion: no-preference) {
+        &:active > * { scale: 0.94; }
+      }
+    }
+
+    /* Sizes: 28, 40, 48, 64×56, 96×72. Finite pill radii (half the height) so they can morph. */
+    &[data-size='sm'] { --m3e-icon-button-size: 28px; --m3e-icon-button-radius: var(--md-sys-shape-corner-small); }
+    &[data-size='lg'] { --m3e-icon-button-size: 48px; --m3e-icon-button-radius: 24px; }
+    &[data-size='xl'] {
+      --m3e-icon-button-size: 56px;
+      --m3e-icon-button-width: 64px;
+      --m3e-icon-button-radius: var(--md-sys-shape-corner-large-increased);
+      --m3e-icon-button-press-radius: 28px;
+    }
+    &[data-size='hero'] {
+      --m3e-icon-button-size: 72px;
+      --m3e-icon-button-width: 96px;
+      --m3e-icon-button-radius: 36px;
+      --m3e-icon-button-press-radius: var(--md-sys-shape-corner-extra-large);
+    }
+
+    /* Variants. --m3e-icon-button-tonal-* let a container restyle every tonal button inside it. */
+    &[data-variant='standard']:where(:not(:disabled)) {
+      &:hover:not([aria-pressed='true']) { --m3e-icon-button-content: var(--md-sys-color-on-surface); }
+      &[aria-pressed='true'] { --m3e-icon-button-content: var(--md-sys-color-primary); }
+    }
+    &[data-variant='tonal'] {
+      --m3e-icon-button-container: var(--m3e-icon-button-tonal-container, var(--md-sys-color-surface-container-highest));
+      --m3e-icon-button-content: var(--m3e-icon-button-tonal-content, var(--md-sys-color-on-surface));
+      &[aria-pressed='true'] {
+        --m3e-icon-button-container: var(--md-sys-color-secondary-container);
+        --m3e-icon-button-content: var(--md-sys-color-on-secondary-container);
+      }
+    }
+    &[data-variant='secondary'] {
+      --m3e-icon-button-container: var(--md-sys-color-secondary-container);
+      --m3e-icon-button-content: var(--md-sys-color-on-secondary-container);
+    }
+    &[data-variant='tertiary'] {
+      --m3e-icon-button-container: var(--md-sys-color-tertiary-container);
+      --m3e-icon-button-content: var(--md-sys-color-on-tertiary-container);
+    }
+    &[data-variant='filled'] {
+      --m3e-icon-button-container: var(--md-sys-color-primary);
+      --m3e-icon-button-content: var(--md-sys-color-on-primary);
+      --m3e-icon-button-state: var(--md-sys-color-on-primary);
+      /* A toggle that is off: quiet container, primary glyph. */
+      &[aria-pressed='false'] {
+        --m3e-icon-button-container: var(--md-sys-color-surface-container-highest);
+        --m3e-icon-button-content: var(--md-sys-color-primary);
+        --m3e-icon-button-state: var(--md-sys-color-primary);
+      }
+    }
+    &[data-variant='outlined'] {
+      & > [data-part='surface'] { box-shadow: inset 0 0 0 1px var(--md-sys-color-outline-variant); }
+      &[aria-pressed='true'] {
+        --m3e-icon-button-container: var(--md-sys-color-inverse-surface);
+        --m3e-icon-button-content: var(--md-sys-color-inverse-on-surface);
+        --m3e-icon-button-state: var(--md-sys-color-inverse-on-surface);
+        & > [data-part='surface'] { box-shadow: none; }
+      }
+    }
+
+    &:disabled {
+      cursor: default;
+      --m3e-icon-button-content: color-mix(in srgb, var(--md-sys-color-on-surface) var(--m3e-disabled-content-opacity), transparent);
+      &:not([data-variant='standard'], [data-variant='outlined']) {
+        --m3e-icon-button-container: color-mix(in srgb, var(--md-sys-color-on-surface) var(--m3e-disabled-container-opacity), transparent);
+      }
+    }
+  }
+
+  /* ---- Common button ---------------------------------------------------------------------- */
+  .m3e-button {
+    --m3e-button-height: 40px;
+    --m3e-button-container: var(--md-sys-color-primary);
+    --m3e-button-content: var(--md-sys-color-on-primary);
+    --m3e-button-radius: calc(var(--m3e-button-height) / 2);
+    --m3e-button-press-radius: var(--md-sys-shape-corner-small);
+    --m3e-button-selected-radius: var(--md-sys-shape-corner-medium);
+
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-sizing: border-box;
+    min-block-size: var(--m3e-button-height);
+    min-inline-size: 48px;
+    margin: 0;
+    padding: 0 16px;
+    border: 0;
+    border-radius: var(--m3e-button-radius);
+    background-color: var(--m3e-button-container);
+    color: var(--m3e-button-content);
+    font-family: var(--md-sys-typescale-label-large-font);
+    font-size: var(--md-sys-typescale-label-large-size);
+    line-height: var(--md-sys-typescale-label-large-line-height);
+    font-weight: var(--md-sys-typescale-label-large-weight);
+    letter-spacing: var(--md-sys-typescale-label-large-tracking);
+    white-space: nowrap;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      border-radius var(--md-sys-motion-spring-default-spatial-duration) var(--md-sys-motion-spring-default-spatial),
+      background-color var(--md-sys-motion-spring-default-effects-duration) var(--md-sys-motion-spring-default-effects),
+      color var(--md-sys-motion-spring-default-effects-duration) var(--md-sys-motion-spring-default-effects),
+      scale var(--md-sys-motion-spring-fast-spatial-duration) var(--md-sys-motion-spring-fast-spatial);
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: var(--m3e-button-content);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--md-sys-motion-spring-fast-effects-duration) var(--md-sys-motion-spring-fast-effects);
+    }
+    &:where(:not(:disabled)) {
+      &:hover::before { opacity: var(--md-sys-state-hover-state-layer-opacity); }
+      &:focus-visible::before { opacity: var(--md-sys-state-focus-state-layer-opacity); }
+      &:active {
+        border-radius: var(--m3e-button-press-radius);
+        &::before { opacity: var(--md-sys-state-pressed-state-layer-opacity); }
+      }
+    }
+    &[aria-pressed='true'] { --m3e-button-radius: var(--m3e-button-selected-radius); }
+
+    &[data-size='xs'] { --m3e-button-height: 32px; padding-inline: 12px; gap: 4px; }
+    &[data-size='md'] {
+      --m3e-button-height: 56px;
+      --m3e-button-press-radius: var(--md-sys-shape-corner-medium);
+      --m3e-button-selected-radius: var(--md-sys-shape-corner-large);
+      padding-inline: 24px;
+      font-size: var(--md-sys-typescale-title-medium-size);
+      line-height: var(--md-sys-typescale-title-medium-line-height);
+    }
+
+    &[data-variant='tonal'] {
+      --m3e-button-container: var(--md-sys-color-secondary-container);
+      --m3e-button-content: var(--md-sys-color-on-secondary-container);
+    }
+    &[data-variant='outlined'] {
+      --m3e-button-container: transparent;
+      --m3e-button-content: var(--md-sys-color-on-surface-variant);
+      box-shadow: inset 0 0 0 1px var(--md-sys-color-outline-variant);
+    }
+    &[data-variant='text'] {
+      --m3e-button-container: transparent;
+      --m3e-button-content: var(--md-sys-color-primary);
+      padding-inline: 12px;
+    }
+    &[data-variant='elevated'] {
+      --m3e-button-container: var(--md-sys-color-surface-container-low);
+      --m3e-button-content: var(--md-sys-color-primary);
+      box-shadow: var(--md-sys-elevation-level1);
+    }
+
+    /* Toggle buttons (ToggleButton, Segmented): quiet when off, primary when on. */
+    &[data-toggle] {
+      --m3e-button-container: var(--m3e-toggle-container, var(--md-sys-color-surface-container-highest));
+      --m3e-button-content: var(--m3e-toggle-content, var(--md-sys-color-on-surface-variant));
+      &[aria-pressed='true'] {
+        --m3e-button-container: var(--m3e-toggle-selected-container, var(--md-sys-color-primary));
+        --m3e-button-content: var(--m3e-toggle-selected-content, var(--md-sys-color-on-primary));
+      }
+    }
+
+    &:disabled {
+      cursor: default;
+      --m3e-button-content: color-mix(in srgb, var(--md-sys-color-on-surface) var(--m3e-disabled-content-opacity), transparent);
+      &:not([data-variant='text'], [data-variant='outlined']) {
+        --m3e-button-container: color-mix(in srgb, var(--md-sys-color-on-surface) var(--m3e-disabled-container-opacity), transparent);
+        box-shadow: none;
+      }
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      &:where(:not(:disabled)):active { scale: 0.97; }
+    }
+  }
+
+  /* ---- Button group ----------------------------------------------------------------------- */
+  .m3e-button-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    /*
+     * Connected: 2px gaps, tight inner corners, pill outer ends; the selected button morphs to a full
+     * pill and a pressed one tightens its inner corners further.
+     */
+    &[data-connected] {
+      gap: 2px;
+      & > .m3e-button {
+        --m3e-group-inner: var(--md-sys-shape-corner-small);
+        --m3e-group-outer: calc(var(--m3e-button-height) / 2);
+        border-radius: var(--m3e-group-inner);
+        &:first-child { border-start-start-radius: var(--m3e-group-outer); border-end-start-radius: var(--m3e-group-outer); }
+        &:last-child { border-start-end-radius: var(--m3e-group-outer); border-end-end-radius: var(--m3e-group-outer); }
+        &[aria-pressed='true'] { border-radius: var(--m3e-group-outer); }
+        &:where(:not(:disabled)):active { --m3e-group-inner: var(--md-sys-shape-corner-extra-small); }
+      }
+    }
+  }
+}

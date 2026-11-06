@@ -1,0 +1,103 @@
+/*
+ * Modal dialog (Dialog.tsx). The rule without [open] is the closed state — and so the exit: closing
+ * moves the dialog back to it. Opening starts from @starting-style.
+ *
+ * Chromium keeps a closing dialog in the top layer through `overlay` + discrete `display`
+ * transitions. WebKit (Tauri on Linux and macOS) has no `overlay`: there Dialog sets
+ * `data-closing` while the dialog is still open, which the open selectors leave out, so the same
+ * transitions run before close(). The backdrop fades in with a keyframe animation because WebKit
+ * ignores @starting-style on ::backdrop.
+ *
+ * Never put `display` utilities on the dialog: they would show it while closed.
+ */
+@layer m3e.components {
+  .m3e-dialog {
+    --m3e-dialog-exit-duration: var(--md-sys-motion-duration-short4);
+
+    box-sizing: border-box;
+    min-inline-size: min(280px, 100% - 48px);
+    max-inline-size: min(560px, 100% - 48px);
+    max-block-size: calc(100% - 48px);
+    margin: auto;
+    padding: 24px;
+    border: 0;
+    border-radius: var(--md-sys-shape-corner-extra-large);
+    background: var(--md-sys-color-surface-container-high);
+    color: var(--md-sys-color-on-surface);
+    box-shadow: var(--md-sys-elevation-level3);
+    overflow: auto;
+
+    /* Closed. */
+    opacity: 0;
+    transition-property: opacity, translate, scale;
+    transition-duration: var(--m3e-dialog-exit-duration);
+    transition-timing-function: var(--md-sys-motion-easing-emphasized-accelerate);
+
+    &:where([open]) {
+      display: flex;
+      flex-direction: column;
+    }
+    &[data-closing] { pointer-events: none; }
+  }
+
+  /* MANDATORY pair: scrolling over the backdrop or inside the dialog must not scroll the page. */
+  .m3e-dialog:modal { overscroll-behavior: contain; }
+
+  .m3e-dialog::backdrop {
+    overflow: hidden;
+    overscroll-behavior: contain;
+    background-color: transparent;
+    transition-property: background-color;
+    transition-duration: var(--md-sys-motion-duration-short4);
+    transition-timing-function: var(--md-sys-motion-easing-standard-accelerate);
+  }
+
+  /* Open (the :where keeps a closing dialog out, so it transitions back to the closed state). */
+  .m3e-dialog:is([open]):where(:not([data-closing])) {
+    opacity: 1;
+    translate: none;
+    scale: none;
+    transition-duration:
+      var(--md-sys-motion-spring-default-effects-duration),
+      var(--md-sys-motion-spring-default-spatial-duration),
+      var(--md-sys-motion-spring-default-spatial-duration);
+    transition-timing-function:
+      var(--md-sys-motion-spring-default-effects),
+      var(--md-sys-motion-spring-default-spatial),
+      var(--md-sys-motion-spring-default-spatial);
+
+    @starting-style { opacity: 0; }
+
+    &::backdrop {
+      background-color: color-mix(in srgb, var(--md-sys-color-scrim) var(--m3e-scrim-opacity), transparent);
+      animation: m3e-scrim-in var(--md-sys-motion-duration-medium1) var(--md-sys-motion-easing-standard-decelerate) backwards;
+    }
+  }
+
+  /* Movement only when motion is welcome; with reduced motion the dialog just fades. */
+  @media (prefers-reduced-motion: no-preference) {
+    .m3e-dialog { scale: 0.96; }
+    .m3e-dialog:is([open]):where(:not([data-closing])) {
+      @starting-style {
+        translate: 0 16px;
+        scale: 0.92;
+      }
+    }
+  }
+
+  /* Where the top layer can hold a closing element, the native close() animates by itself. */
+  @supports (overlay: auto) {
+    .m3e-dialog {
+      transition-property: opacity, translate, scale, display, overlay;
+      transition-behavior: allow-discrete;
+    }
+    .m3e-dialog::backdrop {
+      transition-property: background-color, display, overlay;
+      transition-behavior: allow-discrete;
+    }
+  }
+}
+
+@keyframes m3e-scrim-in {
+  from { background-color: transparent; }
+}

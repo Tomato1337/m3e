@@ -1,0 +1,69 @@
+/* Base: the focus ring every control falls back to, and the M3 state-layer utility. */
+@layer m3e.base {
+  /* Zero specificity: any component or app rule restyles it; never removed without a replacement. */
+  :where(:focus-visible) {
+    outline: var(--m3e-focus-ring-width) solid var(--m3e-focus-ring-color);
+    outline-offset: var(--m3e-focus-ring-offset);
+  }
+}
+
+@layer m3e.utilities {
+  /* Read by screen readers, not shown (the announcer region, extra labels). */
+  .m3e-visually-hidden {
+    position: absolute !important;
+    inline-size: 1px !important;
+    block-size: 1px !important;
+    margin: -1px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    overflow: hidden !important;
+    clip-path: inset(50%) !important;
+    white-space: nowrap !important;
+  }
+
+  /*
+   * State layer: hover/focus/press tint in the content colour, on any element with `.state-layer`
+   * (it needs no extra markup; position: relative unless a later utility positions it otherwise).
+   */
+  .state-layer {
+    position: relative;
+    background-clip: padding-box;
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: var(--state-color, currentColor);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--md-sys-motion-spring-fast-effects-duration) var(--md-sys-motion-spring-fast-effects);
+    }
+    &:where(:not(:disabled, [aria-disabled='true'])) {
+      &:hover::before { opacity: var(--md-sys-state-hover-state-layer-opacity); }
+      &:focus-visible::before { opacity: var(--md-sys-state-focus-state-layer-opacity); }
+      &:active::before { opacity: var(--md-sys-state-pressed-state-layer-opacity); }
+    }
+  }
+  .state-on-surface { --state-color: var(--md-sys-color-on-surface); }
+  .state-on-primary { --state-color: var(--md-sys-color-on-primary); }
+  .state-on-secondary-container { --state-color: var(--md-sys-color-on-secondary-container); }
+
+  /*
+   * Expressive press for custom controls: corners and scale spring back on release.
+   * Morph on :active, never :hover — a hover radius change moves the hit-tested corner under a resting
+   * pointer, drops :hover and flickers. Radii must be finite lengths to interpolate. Never on an element
+   * that hosts a `data-tip` tooltip (see IconButton).
+   */
+  .m3e-morph {
+    transition:
+      border-radius var(--md-sys-motion-spring-default-spatial-duration) var(--md-sys-motion-spring-default-spatial),
+      background-color var(--md-sys-motion-spring-default-effects-duration) var(--md-sys-motion-spring-default-effects),
+      color var(--md-sys-motion-spring-default-effects-duration) var(--md-sys-motion-spring-default-effects),
+      scale var(--md-sys-motion-spring-fast-spatial-duration) var(--md-sys-motion-spring-fast-spatial);
+
+    @media (prefers-reduced-motion: no-preference) {
+      &:active { scale: 0.94; }
+    }
+  }
+}

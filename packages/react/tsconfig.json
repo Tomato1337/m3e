@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "noEmit": false,
+    "emitDeclarationOnly": true,
+    "outDir": "../../node_modules/.tmp/react",
+    "tsBuildInfoFile": "../../node_modules/.tmp/react.tsbuildinfo",
+    "types": []
+  },
+  "include": ["src"],
+  "references": [{ "path": "../tokens" }]
+}

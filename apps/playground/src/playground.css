@@ -1,0 +1,44 @@
+/* Playground page layout only; everything visual comes from the kit. */
+@layer m3e.playground {
+  html { color-scheme: light dark; }
+  body {
+    margin: 0;
+    background: var(--md-sys-color-surface);
+    color: var(--md-sys-color-on-surface);
+    font-family: var(--md-ref-typeface-plain);
+  }
+  main {
+    display: grid;
+    gap: 32px;
+    max-inline-size: 960px;
+    margin: 0 auto;
+    padding: 32px 24px 160px;
+  }
+  section {
+    display: grid;
+    gap: 16px;
+    padding: 24px;
+    border-radius: var(--md-sys-shape-corner-extra-large);
+    background: var(--md-sys-color-surface-container-low);
+  }
+  h1, h2 { margin: 0; }
+  .row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+  .anchor { position: relative; display: inline-block; }
+  .card {
+    inline-size: 240px;
+    padding: 16px;
+    border-radius: var(--md-sys-shape-corner-large);
+    background: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
+  }
+  .panel {
+    position: fixed;
+    inset: 0 0 0 auto;
+    inline-size: 320px;
+    padding: 24px;
+    background: var(--md-sys-color-surface-container);
+    box-shadow: var(--md-sys-elevation-level2);
+  }
+  .actions { display: flex; justify-content: flex-end; gap: 8px; margin-block-start: 24px; }
+  .wave { block-size: 12px; inline-size: 100%; }
+}

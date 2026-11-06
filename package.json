@@ -1,0 +1,35 @@
+{
+  "name": "m3e",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Material 3 Expressive design system: tokens + React UI kit, shared by smart-subtitle and the English course (УМК).",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "gen": "npm run gen --workspace @m3e/tokens",
+    "gen:check": "npm run gen --workspace @m3e/tokens -- --check",
+    "type-check": "tsc -b",
+    "test": "vitest run",
+    "lint": "oxlint packages apps --deny-warnings",
+    "dev": "npm run dev --workspace @m3e/playground",
+    "build": "npm run build --workspace @m3e/playground",
+    "check": "npm run gen:check && npm run type-check && npm run lint && npm test && npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "jsdom": "^26.1.0",
+    "oxlint": "^1.90.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.5",
+    "vitest": "^4.1.12"
+  }
+}

@@ -1,0 +1,100 @@
+/*
+ * Enter/exit motion utilities. Entry runs from @starting-style when the element is inserted or
+ * stops being display: none; exit runs when `data-closing` is set (by <Presence>, usePresence or
+ * animateExit) and the element is removed once the transitions end. So a conditionally rendered
+ * element animates both ways:  <Presence>{open && <div className="m3e-motion-pop">…</div>}</Presence>
+ *
+ * Enter: springs (effects for opacity, spatial for movement). Exit: shorter and accelerating, no
+ * overshoot. Reduced motion keeps the fades and drops the movement.
+ */
+@layer m3e.utilities {
+  :is(.m3e-motion-fade, .m3e-motion-pop, .m3e-motion-rise, .m3e-motion-from-left, .m3e-motion-from-right, .m3e-motion-from-top, .m3e-motion-from-bottom) {
+    --m3e-enter-spatial-duration: var(--md-sys-motion-spring-default-spatial-duration);
+    --m3e-enter-spatial: var(--md-sys-motion-spring-default-spatial);
+    transition-property: opacity, translate, scale;
+    transition-duration:
+      var(--md-sys-motion-spring-default-effects-duration),
+      var(--m3e-enter-spatial-duration),
+      var(--m3e-enter-spatial-duration);
+    transition-timing-function:
+      var(--md-sys-motion-spring-default-effects),
+      var(--m3e-enter-spatial),
+      var(--m3e-enter-spatial);
+
+    @starting-style { opacity: 0; }
+
+    &[data-closing] {
+      opacity: 0;
+      pointer-events: none;
+      transition-duration: var(--md-sys-motion-duration-short3), var(--md-sys-motion-duration-short4), var(--md-sys-motion-duration-short4);
+      transition-timing-function: var(--md-sys-motion-easing-emphasized-accelerate);
+    }
+  }
+
+  /* Edge panels must not overshoot past their edge: emphasized decelerate instead of a spring. */
+  :is(.m3e-motion-from-left, .m3e-motion-from-right, .m3e-motion-from-top, .m3e-motion-from-bottom) {
+    --m3e-enter-spatial-duration: var(--md-sys-motion-duration-medium4);
+    --m3e-enter-spatial: var(--md-sys-motion-easing-emphasized-decelerate);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .m3e-motion-pop {
+      @starting-style { scale: 0.92; }
+      &[data-closing] { scale: 0.96; }
+    }
+    .m3e-motion-rise {
+      @starting-style { translate: 0 12px; }
+      &[data-closing] { translate: 0 8px; }
+    }
+    .m3e-motion-from-left {
+      @starting-style { translate: -100% 0; }
+      &[data-closing] { translate: -100% 0; }
+    }
+    .m3e-motion-from-right {
+      @starting-style { translate: 100% 0; }
+      &[data-closing] { translate: 100% 0; }
+    }
+    .m3e-motion-from-top {
+      @starting-style { translate: 0 -100%; }
+      &[data-closing] { translate: 0 -100%; }
+    }
+    .m3e-motion-from-bottom {
+      @starting-style { translate: 0 100%; }
+      &[data-closing] { translate: 0 100%; }
+    }
+    /* Edge panels keep full opacity: the slide is the whole cue. */
+    :is(.m3e-motion-from-left, .m3e-motion-from-right, .m3e-motion-from-top, .m3e-motion-from-bottom) {
+      @starting-style { opacity: 1; }
+      &[data-closing] { opacity: 1; }
+    }
+  }
+
+  /*
+   * Indeterminate busy ring (Spinner.tsx): a labelled <progress> or a decorative span. Slower under
+   * reduced motion, not stopped: a frozen ring reads as a hung task.
+   */
+  .m3e-spinner {
+    appearance: none;
+    display: inline-block;
+    box-sizing: border-box;
+    inline-size: var(--m3e-spinner-size, 48px);
+    block-size: var(--m3e-spinner-size, 48px);
+    flex-shrink: 0;
+    margin: 0;
+    padding: 0;
+    border: var(--m3e-spinner-width, 4px) solid var(--md-sys-color-surface-container-highest);
+    border-block-start-color: var(--md-sys-color-primary);
+    border-radius: 50%;
+    background: none;
+    vertical-align: middle;
+    animation: m3e-spin 900ms linear infinite;
+
+    @media (prefers-reduced-motion: reduce) { animation-duration: 6s; }
+  }
+  /* <progress>: hide the native bars. One rule per prefix — a list with an unknown one is dropped. */
+  progress.m3e-spinner::-webkit-progress-bar { display: none; background: none; }
+  progress.m3e-spinner::-webkit-progress-value { display: none; background: none; }
+  progress.m3e-spinner::-moz-progress-bar { display: none; background: none; }
+}
+
+@keyframes m3e-spin { to { rotate: 1turn; } }

@@ -1,0 +1,53 @@
+/*
+ * Wavy progress (WavyProgress.tsx) and the wavy spinner. The wave travels by a CSS transform of a
+ * pre-built path — no per-frame script. An ancestor with `.m3e-wavy-idle` pauses it (WebKit repaints
+ * SVG transforms on the main thread, so stop it while hidden); reduced motion pauses it too.
+ */
+@layer m3e.components {
+  .m3e-wavy {
+    display: block;
+
+    & svg {
+      display: block;
+      inline-size: 100%;
+      block-size: 100%;
+      overflow: visible;
+    }
+    & [data-part='wave'] {
+      fill: none;
+      stroke: var(--m3e-wave-active, var(--md-sys-color-primary));
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      animation: m3e-wavy-travel var(--m3e-wave-period, 1.111s) linear infinite;
+    }
+    & [data-part='wave'][data-paused] { animation-play-state: paused; }
+    & [data-part='track'] {
+      stroke: var(--m3e-wave-track, var(--md-sys-color-secondary-container));
+      stroke-linecap: round;
+    }
+    & [data-part='buffer'] {
+      stroke: var(--m3e-wave-buffer, var(--md-sys-color-outline-variant));
+      stroke-linecap: round;
+    }
+    & :is([data-part='stop'], [data-part='thumb']) { fill: var(--m3e-wave-active, var(--md-sys-color-primary)); }
+
+    @media (prefers-reduced-motion: reduce) {
+      & [data-part='wave'] { animation-play-state: paused; }
+    }
+  }
+  .m3e-wavy-idle .m3e-wavy [data-part='wave'] { animation-play-state: paused; }
+
+  .m3e-wavy-spinner {
+    flex-shrink: 0;
+    color: var(--md-sys-color-primary);
+    animation: m3e-spin 1.6s linear infinite;
+
+    /* Slower, not stopped: a frozen spinner reads as a hung task. */
+    @media (prefers-reduced-motion: reduce) { animation-duration: 6s; }
+  }
+}
+
+@keyframes m3e-wavy-travel {
+  from { transform: translateX(0); }
+  to { transform: translateX(var(--m3e-wave-len, 0px)); }
+}
