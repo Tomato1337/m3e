@@ -98,7 +98,15 @@ export function customColorTones(
   }
 }
 
-/** Writes custom properties as inline styles (the highest-priority theme source) on `el`. */
-export function applyVars(vars: Record<string, string>, el: HTMLElement = document.documentElement): void {
-  for (const [k, v] of Object.entries(vars)) el.style.setProperty(k, v)
+/** Anything with an inline style, e.g. an HTMLElement. Structural, so Node scripts need no DOM types. */
+export type StyleTarget = { style: { setProperty(name: string, value: string): void } }
+
+/**
+ * Writes custom properties as inline styles (the highest-priority theme source) on `el`, by default
+ * the root element. Without a document (Node) and no `el` it does nothing.
+ */
+export function applyVars(vars: Record<string, string>, el?: StyleTarget): void {
+  const target = el ?? (globalThis as { document?: { documentElement: StyleTarget } }).document?.documentElement
+  if (!target) return
+  for (const [k, v] of Object.entries(vars)) target.style.setProperty(k, v)
 }

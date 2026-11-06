@@ -54,6 +54,8 @@ export default defineConfig({
 
 `cssTarget` важен: со старыми целями Lightning CSS переписывает `light-dark()` в хак с переменными, и цвета ломаются.
 
+TypeScript: пакеты отдаются исходниками (`.ts`/`.tsx`, без сборки), поэтому `tsc` приложения проверяет и их. Нужны `"moduleResolution": "bundler"` и `"allowImportingTsExtensions": true` (как в шаблоне Vite) — относительные импорты кита пишутся с расширением, а `.d.ts` у `@material/material-color-utilities` 0.4 без расширений и в режиме `node16`/`nodenext` не резолвятся. Типы React должны быть одной копией: если `tsc` видит `@types/react` и из кита, и из приложения, JSX-типы расходятся. В приложении это решается через `paths` (`"react": ["./node_modules/@types/react"]` и т. п.). `@m3e/tokens` не зависит от DOM (`lib: ES2023`), поэтому его можно импортировать и в Node-скриптах (`tsconfig.node.json`).
+
 CSS (Tailwind 4) — порядок слоёв объявляется первым:
 
 ```css
@@ -70,6 +72,12 @@ CSS (Tailwind 4) — порядок слоёв объявляется первы
 import { applyVars, schemeVars } from '@m3e/tokens'
 applyVars(schemeVars('#6750a4', { dark: true, variant: 'expressive' }))
 ```
+
+`applyVars(vars, el?)` пишет переменные инлайн-стилями: по умолчанию на корневой элемент, а `el` может быть любым элементом (тема на поддерево) — подходит всё, у чего есть `style.setProperty`.
+
+## Версии
+
+Версия кита — git-тег (`v0.1.0`, …). Приложения в CI клонируют кит рядом с собой на закреплённом теге (в smart-subtitle — переменная `M3E_REF` в `.github/workflows/release.yml`), локально — любая ветка. Ломающие изменения API или токенов — новый минорный тег до 1.0; после смены тега в приложении прогоните его `tsc -b` и сборку.
 
 ## Компоненты: важные договорённости
 

@@ -54,6 +54,15 @@ no `overscroll-behavior` on non-scrollable boxes.
   traps. Status text goes through `announce()` (one polite region that follows the open modal).
 - Keep `@types/react`/`@types/react-dom` pinned to the same versions as the consumers; two
   copies break JSX types across the `file:` link.
+- Consumers type-check the kit sources with their own `tsc` (`moduleResolution: bundler`,
+  `allowImportingTsExtensions`). Relative imports carry explicit `.ts`/`.tsx` extensions;
+  `@material/material-color-utilities` 0.4 ships extensionless `.d.ts` imports, so do not switch
+  the kit to `node16`/`nodenext` resolution.
+- `@m3e/tokens` is DOM-free (`lib: ES2023`; `applyVars` takes a `StyleTarget`), so Node-side
+  scripts can import it. Keep DOM and React code in `@m3e/react`.
+- Releases are git tags (`v0.1.0`, …). Consumers' CI clones the kit at a pinned tag
+  (smart-subtitle: `M3E_REF` in `.github/workflows/release.yml`); breaking API or token changes
+  need a new tag and a note in the README.
 
 ## Verifying motion
 
