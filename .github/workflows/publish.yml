@@ -1,0 +1,48 @@
+# Every push and pull request runs `npm run check`.
+# A tag `v*` (e.g. `git tag v0.2.0 && git push origin v0.2.0`) also publishes both packages to npm.
+# Publishing uses npm trusted publishing (OIDC): no token in the repository. Each package on npmjs.com
+# needs Settings → Trusted publishing → GitHub Actions: Tomato1337/m3e, workflow publish.yml.
+name: Publish
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          # Trusted publishing needs npm 11.5.1 or newer, which Node 24 ships.
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - name: Publish
+        if: github.ref_type == 'tag'
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          for dir in packages/tokens packages/react; do
+            name=$(jq -r .name "$dir/package.json")
+            version=$(jq -r .version "$dir/package.json")
+            if [ "$TAG" != "v$version" ]; then
+              echo "::error::Тег $TAG не совпадает с версией $version в $dir/package.json"
+              exit 1
+            fi
+            # A re-run after a partial publish skips what is already on the registry: versions are immutable.
+            if npm view "$name@$version" version >/dev/null 2>&1; then
+              echo "$name@$version уже опубликован"
+              continue
+            fi
+            npm publish --workspace "$dir"
+          done

@@ -1,5 +1,5 @@
 /*
- * @m3e/tokens — all design tokens as CSS custom properties, in the `m3e.tokens` cascade layer.
+ * @tomato1337/m3e-tokens — all design tokens as CSS custom properties, in the `m3e.tokens` cascade layer.
  * With Tailwind, declare the order first so Tailwind's preflight sits below the kit and its
  * utilities above it:   @layer theme, base, m3e, components, utilities;
  */

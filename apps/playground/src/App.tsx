@@ -1,4 +1,4 @@
-import { applyVars, schemeVars } from '@m3e/tokens'
+import { applyVars, schemeVars } from '@tomato1337/m3e-tokens'
 import {
   Button,
   ButtonGroup,
@@ -18,7 +18,7 @@ import {
   usePresence,
   WavyProgress,
   WavySpinner,
-} from '@m3e/react'
+} from '@tomato1337/m3e-react'
 import { useEffect, useRef, useState } from 'react'
 
 const MODES = [

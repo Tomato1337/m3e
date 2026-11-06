@@ -1,17 +1,18 @@
 # m3e — notes for coding agents
 
 Material 3 Expressive design system shared by smart-subtitle (Tauri 2 desktop player) and the
-interactive English course. npm workspaces: `packages/tokens` (`@m3e/tokens`), `packages/react`
-(`@m3e/react`), `apps/playground`. Consumers link it with `file:../m3e/packages/*`; there is no
-build step — packages export TypeScript and CSS sources. User docs: `README.md` (Russian).
+interactive English course. npm workspaces: `packages/tokens` (`@tomato1337/m3e-tokens`), `packages/react`
+(`@tomato1337/m3e-react`), `apps/playground`. Both packages are published to npm; consumers install them
+from the registry. User docs: `README.md` (Russian).
 
 ## Commands
 
 ```sh
 npm install
-npm run check      # gen --check, tsc -b, oxlint --deny-warnings, vitest, playground build — run before handing back
-npm run gen        # regenerate packages/tokens/css/{color,motion,tailwind}.css (never edit them by hand)
-npm run dev        # playground
+npm run check            # gen --check, tsc -b, oxlint --deny-warnings, vitest, package + playground build — run before handing back
+npm run gen              # regenerate packages/tokens/css/{color,motion,tailwind}.css (never edit them by hand)
+npm run build:packages   # packages/*/dist (scripts/build-package.mjs); prepack runs it too
+npm run dev              # playground
 ```
 
 ## Browser-support policy
@@ -53,16 +54,23 @@ no `overscroll-behavior` on non-scrollable boxes.
 - Accessibility: native `<dialog>`/popover semantics, no `role="dialog"`/`aria-modal`, no focus
   traps. Status text goes through `announce()` (one polite region that follows the open modal).
 - Keep `@types/react`/`@types/react-dom` pinned to the same versions as the consumers; two
-  copies break JSX types across the `file:` link.
-- Consumers type-check the kit sources with their own `tsc` (`moduleResolution: bundler`,
-  `allowImportingTsExtensions`). Relative imports carry explicit `.ts`/`.tsx` extensions;
-  `@material/material-color-utilities` 0.4 ships extensionless `.d.ts` imports, so do not switch
-  the kit to `node16`/`nodenext` resolution.
-- `@m3e/tokens` is DOM-free (`lib: ES2023`; `applyVars` takes a `StyleTarget`), so Node-side
-  scripts can import it. Keep DOM and React code in `@m3e/react`.
-- Releases are git tags (`v0.1.0`, …). Consumers' CI clones the kit at a pinned tag
-  (smart-subtitle: `M3E_REF` in `.github/workflows/release.yml`); breaking API or token changes
-  need a new tag and a note in the README.
+  copies break JSX types when a consumer links the kit with `npm link`.
+- Packages: `exports` list the condition `m3e-source` (→ `src/`) before `types`/`default` (→ `dist/`).
+  The workspace resolves sources through it (`customConditions` in `tsconfig.base.json`,
+  `resolve.conditions` in the playground's Vite config), so nothing in the workspace needs a build.
+  `tsconfig.build.json` per package emits `dist/` without the condition; `scripts/build-package.mjs`
+  rewrites the `.ts`/`.tsx` specifiers tsc leaves in `.d.ts` files. CSS is exported from `src/` and
+  `css/` directly. Published files: `dist`, `src` (no tests), `css`, `LICENSE`.
+- Relative imports carry explicit `.ts`/`.tsx` extensions (`rewriteRelativeImportExtensions` turns them
+  into `.js` in `dist/`). `@material/material-color-utilities` 0.4 ships extensionless `.d.ts` imports,
+  so do not switch the kit to `node16`/`nodenext` resolution; its types must not leak into the public
+  `.d.ts` of `@tomato1337/m3e-tokens`.
+- `@tomato1337/m3e-tokens` is DOM-free (`lib: ES2023`; `applyVars` takes a `StyleTarget`), so Node-side
+  scripts can import it. Keep DOM and React code in `@tomato1337/m3e-react`.
+- Releases: one version for both packages (`packages/*/package.json`, plus react's exact dependency on
+  tokens) and a git tag `v<version>`; `.github/workflows/publish.yml` publishes a pushed tag through npm
+  trusted publishing. Breaking API or token changes need a new minor version before 1.0 and a note in the
+  README. Consumers bump the dependency (smart-subtitle: `package.json`).
 
 ## Verifying motion
 

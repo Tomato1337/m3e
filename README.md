@@ -4,8 +4,8 @@
 
 | Пакет | Что внутри |
 | --- | --- |
-| `@m3e/tokens` | CSS-токены (цвет, типографика, формы, тени, состояния, движение) в слое `m3e.tokens`; TS-утилиты: схема из seed-цвета (`schemeVars`), гармонизированные свои цвета (`customColorTones`), пружины M3 Expressive → `linear()` (`springEasing`). |
-| `@m3e/react` | React 19 компоненты: `Dialog`, `Menu`, `Snackbar`/`toast`, `IconButton`, `Button`, `ButtonGroup`/`ToggleButton`/`Segmented`, `Chip`, `Switch`, `Spinner`, `WavyProgress`, `WavySpinner`, `Icon`, тултипы `data-tip`, `Presence`/`usePresence` и классы `m3e-motion-*`. |
+| `@tomato1337/m3e-tokens` | CSS-токены (цвет, типографика, формы, тени, состояния, движение) в слое `m3e.tokens`; TS-утилиты: схема из seed-цвета (`schemeVars`), гармонизированные свои цвета (`customColorTones`), пружины M3 Expressive → `linear()` (`springEasing`). |
+| `@tomato1337/m3e-react` | React 19 компоненты: `Dialog`, `Menu`, `Snackbar`/`toast`, `IconButton`, `Button`, `ButtonGroup`/`ToggleButton`/`Segmented`, `Chip`, `Switch`, `Spinner`, `WavyProgress`, `WavySpinner`, `Icon`, тултипы `data-tip`, `Presence`/`usePresence` и классы `m3e-motion-*`. |
 | `apps/playground` | Витрина всех компонентов и анимаций (`npm run dev`). |
 
 ## Главное: анимации входа **и выхода**
@@ -28,40 +28,30 @@
 
 ## Подключение к приложению
 
-Репозиторий кладётся рядом с приложением (`…/m3e` и `…/smart-subtitle`), зависимости — через `file:`:
-
-```jsonc
-// package.json приложения
-"@m3e/react": "file:../m3e/packages/react",
-"@m3e/tokens": "file:../m3e/packages/tokens"
-```
+Пакеты опубликованы в npm: [`@tomato1337/m3e-tokens`](https://www.npmjs.com/package/@tomato1337/m3e-tokens) и [`@tomato1337/m3e-react`](https://www.npmjs.com/package/@tomato1337/m3e-react). В пакете собранный JS с `.d.ts` (`dist/`), CSS и исходники (для source maps).
 
 ```sh
-(cd ../m3e && npm install)   # у кита свои node_modules (шрифт Material Symbols, color utilities)
-npm install
+npm install @tomato1337/m3e-react @tomato1337/m3e-tokens
 ```
 
-`vite.config.ts` приложения:
+Нужны React 19 и `@types/react` в самом приложении (у кита они peer). `vite.config.ts` приложения:
 
 ```ts
-import { searchForWorkspaceRoot } from 'vite'
 export default defineConfig({
-  resolve: { dedupe: ['react', 'react-dom'] },          // один React на всё дерево
-  server: { fs: { allow: [searchForWorkspaceRoot(process.cwd()), '../m3e'] } },
   build: { target: ['es2023', 'chrome123', 'safari17.5'], cssTarget: ['chrome123', 'safari17.5'] },
 })
 ```
 
 `cssTarget` важен: со старыми целями Lightning CSS переписывает `light-dark()` в хак с переменными, и цвета ломаются.
 
-TypeScript: пакеты отдаются исходниками (`.ts`/`.tsx`, без сборки), поэтому `tsc` приложения проверяет и их. Нужны `"moduleResolution": "bundler"` и `"allowImportingTsExtensions": true` (как в шаблоне Vite) — относительные импорты кита пишутся с расширением, а `.d.ts` у `@material/material-color-utilities` 0.4 без расширений и в режиме `node16`/`nodenext` не резолвятся. Типы React должны быть одной копией: если `tsc` видит `@types/react` и из кита, и из приложения, JSX-типы расходятся. В приложении это решается через `paths` (`"react": ["./node_modules/@types/react"]` и т. п.). `@m3e/tokens` не зависит от DOM (`lib: ES2023`), поэтому его можно импортировать и в Node-скриптах (`tsconfig.node.json`).
+TypeScript: подойдёт любой `moduleResolution` (`bundler`, `node16`, `nodenext`); типы — из `dist/*.d.ts`. `@tomato1337/m3e-tokens` не зависит от DOM (`lib: ES2023`), поэтому его можно импортировать и в Node-скриптах через `tsx` или бандлер. Чистый Node ESM его не загрузит: `@material/material-color-utilities` 0.4 содержит импорт без расширения. По той же причине в Vitest добавьте оба пакета в `test.server.deps.inline: ['@tomato1337/m3e-tokens', '@material/material-color-utilities']`.
 
 CSS (Tailwind 4) — порядок слоёв объявляется первым:
 
 ```css
 @layer theme, base, m3e, components, utilities;
 @import 'tailwindcss';
-@import '@m3e/react/styles.css';   /* тянет и @m3e/tokens/tokens.css */
+@import '@tomato1337/m3e-react/styles.css';   /* тянет и @tomato1337/m3e-tokens/tokens.css */
 ```
 
 Так preflight Tailwind оказывается ниже кита, а утилиты (`p-4`, `font-semibold`) — выше. Токены объявлены с нулевой специфичностью (`:where(:root)`) внутри слоя, поэтому любые переменные приложения (`--md-sys-color-*` из живой темы) их перекрывают. Шрифт Roboto Flex приложение подключает само (`@fontsource-variable/roboto-flex/wdth.css`); Material Symbols Rounded подключает кит.
@@ -69,15 +59,30 @@ CSS (Tailwind 4) — порядок слоёв объявляется первы
 Тема из seed-цвета:
 
 ```ts
-import { applyVars, schemeVars } from '@m3e/tokens'
+import { applyVars, schemeVars } from '@tomato1337/m3e-tokens'
 applyVars(schemeVars('#6750a4', { dark: true, variant: 'expressive' }))
 ```
 
 `applyVars(vars, el?)` пишет переменные инлайн-стилями: по умолчанию на корневой элемент, а `el` может быть любым элементом (тема на поддерево) — подходит всё, у чего есть `style.setProperty`.
 
+### Разработка кита вместе с приложением
+
+Чтобы проверить изменение кита в приложении до публикации, подключите локальную копию через `npm link` и пересоберите пакеты:
+
+```sh
+(cd ../m3e && npm install && npm run build:packages)
+npm link ../m3e/packages/tokens ../m3e/packages/react   # в папке приложения
+# …после каждой правки кита: (cd ../m3e && npm run build:packages)
+npm install                                           # вернуть версии из npm
+```
+
+Связанный кит лежит вне `node_modules` приложения, поэтому приложению нужны `resolve.dedupe: ['react', 'react-dom']` в Vite (один React), `server.fs.allow` с путём к `../m3e` (шрифты кита в dev-сервере) и в `tsconfig` `paths` для `react`/`react-dom` на свои `@types` — иначе `tsc` возьмёт вторую копию из `../m3e/node_modules` и JSX-типы разойдутся.
+
 ## Версии
 
-Версия кита — git-тег (`v0.1.0`, …). Приложения в CI клонируют кит рядом с собой на закреплённом теге (в smart-subtitle — переменная `M3E_REF` в `.github/workflows/release.yml`), локально — любая ветка. Ломающие изменения API или токенов — новый минорный тег до 1.0; после смены тега в приложении прогоните его `tsc -b` и сборку.
+Версия — поле `version` в `packages/*/package.json` (у обоих пакетов одна) и git-тег `v<версия>`. Выпуск: поднять версию в обоих `package.json` (и зависимость `@tomato1337/m3e-react` → `@tomato1337/m3e-tokens`), `npm install`, закоммитить, `git tag v0.3.0 && git push origin main v0.3.0`. Workflow `.github/workflows/publish.yml` прогоняет `npm run check` и публикует пакеты через trusted publishing (OIDC, без токена). Ломающие изменения API или токенов до 1.0 — новая минорная версия; в приложении после обновления прогоните `tsc -b` и сборку.
+
+Первую версию нового пакета npm принимает только вручную: `npm login`, затем `npm publish --workspace packages/tokens --workspace packages/react`; после этого на npmjs.com в настройках каждого пакета включается Trusted publishing → GitHub Actions (`Tomato1337/m3e`, `publish.yml`).
 
 ## Компоненты: важные договорённости
 
@@ -103,7 +108,8 @@ applyVars(schemeVars('#6750a4', { dark: true, variant: 'expressive' }))
 
 ```sh
 npm install
-npm run dev          # playground
-npm run check        # свежесть сгенерированных токенов, tsc -b, oxlint, vitest, сборка playground
-npm run gen          # пересобрать css/color.css, css/motion.css, css/tailwind.css из TS
+npm run dev              # playground (берёт пакеты из исходников, без сборки)
+npm run check            # свежесть сгенерированных токенов, tsc -b, oxlint, vitest, сборка пакетов и playground
+npm run build:packages   # packages/*/dist — то, что уходит в npm
+npm run gen              # пересобрать css/color.css, css/motion.css, css/tailwind.css из TS
 ```

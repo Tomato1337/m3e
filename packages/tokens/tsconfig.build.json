@@ -1,0 +1,17 @@
+{
+  // The published build: JS + declarations in dist/. tsconfig.json only type-checks (with the tests).
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": "dist",
+    "rootDir": "src",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "rewriteRelativeImportExtensions": true,
+    "customConditions": [],
+    "lib": ["ES2023"],
+    "types": []
+  },
+  "include": ["src"]
+}

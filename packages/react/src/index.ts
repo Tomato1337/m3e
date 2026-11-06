@@ -1,4 +1,4 @@
-// Styles: import '@m3e/react/styles.css' once (it brings the tokens along).
+// Styles: import '@tomato1337/m3e-react/styles.css' once (it brings the tokens along).
 
 export { announce } from './a11y/announce.ts'
 export { cx } from './cx.ts'

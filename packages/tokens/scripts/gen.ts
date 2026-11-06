@@ -109,7 +109,7 @@ const twColors = colorRoles.map((r) => {
   return `  --color-${v.replace('--md-sys-color-', '')}: var(${v});`
 })
 emit('tailwind.css', `/*
- * Optional Tailwind v4 mapping: \`@import '@m3e/tokens/tailwind.css';\` after \`@import 'tailwindcss';\`
+ * Optional Tailwind v4 mapping: \`@import '@tomato1337/m3e-tokens/tailwind.css';\` after \`@import 'tailwindcss';\`
  * gives bg-primary, text-on-surface-variant, rounded-m3-lg, shadow-level2, ease-spring-fast-spatial…
  * \`inline\` keeps the utilities pointing at the live tokens, so runtime theming still applies.
  */
