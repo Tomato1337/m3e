@@ -1,5 +1,5 @@
 import type { Ref } from 'react'
-import { cx } from '../cx'
+import { cx } from '../cx.ts'
 
 /**
  * M3 switch on a native checkbox with the `switch` attribute (and role="switch" for engines that do

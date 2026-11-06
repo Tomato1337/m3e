@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { hideToast, toast, toastStore } from './toast'
+import { hideToast, toast, toastStore } from './toast.ts'
 
 describe('toast store', () => {
   it('shows, restarts on the same text and hides', () => {

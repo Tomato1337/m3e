@@ -1,4 +1,4 @@
-import { animateExit, CLOSING, EXIT_TIMEOUT_MS } from './exit'
+import { animateExit, CLOSING, EXIT_TIMEOUT_MS } from './exit.ts'
 
 let displayTransition: boolean | undefined
 

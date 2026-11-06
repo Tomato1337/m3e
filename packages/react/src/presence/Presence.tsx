@@ -10,7 +10,7 @@ import {
   type ReactNode,
   type RefObject,
 } from 'react'
-import { animateExit, clearExit } from './exit'
+import { animateExit, clearExit } from './exit.ts'
 
 type PresenceContextValue = {
   /** False while the subtree plays its exit; it unmounts once every participant is done. */

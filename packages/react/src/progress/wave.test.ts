@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { waveGeom } from './wave'
+import { waveGeom } from './wave.ts'
 
 const BASE = { amp: 4, len: 30, stroke: 6, phase: 0, thumb: true }
 

@@ -1,9 +1,9 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
-import { announce } from '../a11y/announce'
-import { cx } from '../cx'
-import { clearExit } from '../presence/exit'
-import { closeTopLayer } from '../presence/topLayer'
-import { hideToast, useToast, type ToastOptions } from './toast'
+import { announce } from '../a11y/announce.ts'
+import { cx } from '../cx.ts'
+import { clearExit } from '../presence/exit.ts'
+import { closeTopLayer } from '../presence/topLayer.ts'
+import { hideToast, useToast, type ToastOptions } from './toast.ts'
 
 type Shown = { message: string; options: ToastOptions; seq: number }
 

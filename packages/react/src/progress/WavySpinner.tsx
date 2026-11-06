@@ -1,4 +1,4 @@
-import { cx } from '../cx'
+import { cx } from '../cx.ts'
 
 // 300 samples of a wavy circle with a 78% sweep.
 const D = (() => {

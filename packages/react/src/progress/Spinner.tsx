@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react'
-import { cx } from '../cx'
+import { cx } from '../cx.ts'
 
 /**
  * Indeterminate busy ring. With `label` it is a native <progress> (an implicit progressbar with

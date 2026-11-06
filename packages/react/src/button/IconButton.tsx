@@ -1,8 +1,8 @@
 import type { ButtonHTMLAttributes, CSSProperties, Ref } from 'react'
-import { cx } from '../cx'
-import { Icon } from '../icon/Icon'
-import { shapeClip, type ShapeName } from '../shape/shapes'
-import { useTipAnchor } from '../tooltip/useTipAnchor'
+import { cx } from '../cx.ts'
+import { Icon } from '../icon/Icon.tsx'
+import { shapeClip, type ShapeName } from '../shape/shapes.ts'
+import { useTipAnchor } from '../tooltip/useTipAnchor.ts'
 
 export type IconButtonVariant = 'standard' | 'filled' | 'tonal' | 'secondary' | 'tertiary' | 'outlined'
 export type IconButtonSize = 'sm' | 'md' | 'lg' | 'xl' | 'hero'

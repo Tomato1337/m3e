@@ -8,13 +8,13 @@ import {
   type ReactNode,
   type RefObject,
 } from 'react'
-import { cx } from '../cx'
-import { Icon } from '../icon/Icon'
-import { clearExit } from '../presence/exit'
-import { usePresenceParticipant } from '../presence/Presence'
-import { closeTopLayer } from '../presence/topLayer'
-import { SwitchIndicator } from '../switch/Switch'
-import { useLatest } from '../useLatest'
+import { cx } from '../cx.ts'
+import { Icon } from '../icon/Icon.tsx'
+import { clearExit } from '../presence/exit.ts'
+import { usePresenceParticipant } from '../presence/Presence.tsx'
+import { closeTopLayer } from '../presence/topLayer.ts'
+import { SwitchIndicator } from '../switch/Switch.tsx'
+import { useLatest } from '../useLatest.ts'
 
 export type MenuProps = {
   open: boolean

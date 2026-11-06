@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, type CSSProperties } from 'react'
-import { cx } from '../cx'
-import { waveGeom } from './wave'
+import { cx } from '../cx.ts'
+import { waveGeom } from './wave.ts'
 
 type Props = {
  value: number

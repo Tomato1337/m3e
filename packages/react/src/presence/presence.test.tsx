@@ -2,9 +2,9 @@
 import { act, useRef } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { announce } from '../a11y/announce'
-import { animateExit, CLOSING } from './exit'
-import { Presence, usePresence } from './Presence'
+import { announce } from '../a11y/announce.ts'
+import { animateExit, CLOSING } from './exit.ts'
+import { Presence, usePresence } from './Presence.tsx'
 
 declare global {
   var IS_REACT_ACT_ENVIRONMENT: boolean

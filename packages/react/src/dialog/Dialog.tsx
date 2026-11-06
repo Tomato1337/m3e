@@ -1,9 +1,9 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ComponentPropsWithoutRef, type ReactNode, type Ref } from 'react'
-import { cx } from '../cx'
-import { clearExit } from '../presence/exit'
-import { usePresenceParticipant } from '../presence/Presence'
-import { closeTopLayer } from '../presence/topLayer'
-import { mergeRefs, useLatest } from '../useLatest'
+import { cx } from '../cx.ts'
+import { clearExit } from '../presence/exit.ts'
+import { usePresenceParticipant } from '../presence/Presence.tsx'
+import { closeTopLayer } from '../presence/topLayer.ts'
+import { mergeRefs, useLatest } from '../useLatest.ts'
 
 export type DialogProps = Omit<ComponentPropsWithoutRef<'dialog'>, 'open' | 'onClose' | 'onCancel' | 'children'> & {
   /** Defaults to true: inside `<Presence>` the dialog opens on mount and animates out on unmount. */

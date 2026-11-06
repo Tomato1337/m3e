@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { colorRoles, colorVar, customColorTones, schemeVars } from '../src/color'
+import { colorRoles, colorVar, customColorTones, schemeVars } from '../src/color.ts'
 
 const HEX = /^#[0-9a-f]{6}$/
 

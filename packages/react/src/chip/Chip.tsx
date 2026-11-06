@@ -1,6 +1,6 @@
 import type { ButtonHTMLAttributes, Ref } from 'react'
-import { cx } from '../cx'
-import { Icon } from '../icon/Icon'
+import { cx } from '../cx.ts'
+import { Icon } from '../icon/Icon.tsx'
 
 /**
  * M3 filter chip: 32 px, 8 px corners; selected shows a check mark on secondary-container. The mark

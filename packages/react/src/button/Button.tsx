@@ -1,6 +1,6 @@
 import type { ButtonHTMLAttributes, ReactNode, Ref } from 'react'
-import { cx } from '../cx'
-import { Icon } from '../icon/Icon'
+import { cx } from '../cx.ts'
+import { Icon } from '../icon/Icon.tsx'
 
 export type ButtonVariant = 'filled' | 'tonal' | 'outlined' | 'text' | 'elevated'
 export type ButtonSize = 'xs' | 'sm' | 'md'

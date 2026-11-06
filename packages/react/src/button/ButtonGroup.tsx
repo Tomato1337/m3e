@@ -1,6 +1,6 @@
 import type { HTMLAttributes, ReactNode } from 'react'
-import { cx } from '../cx'
-import { Button, type ButtonProps } from './Button'
+import { cx } from '../cx.ts'
+import { Button, type ButtonProps } from './Button.tsx'
 
 export type ButtonGroupProps = HTMLAttributes<HTMLDivElement> & {
   /** Accessible name of the group. */

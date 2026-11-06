@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { emphasizedEasing, settleTime, springAt, springEasing, springs } from '../src/motion'
+import { emphasizedEasing, settleTime, springAt, springEasing, springs } from '../src/motion.ts'
 
 const peak = (s: { stiffness: number; damping: number }) => {
   let max = 0

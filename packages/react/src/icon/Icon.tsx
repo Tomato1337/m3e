@@ -1,4 +1,4 @@
-import { cx } from '../cx'
+import { cx } from '../cx.ts'
 
 /** Material Symbols Rounded glyph by ligature name; decorative (the control carries the label). */
 export function Icon({ name, size, fill, className }: { name: string; size?: number; fill?: boolean; className?: string }) {
