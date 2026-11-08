@@ -10,8 +10,19 @@ export { Presence, usePresence, usePresenceParticipant } from './presence/Presen
 
 export { Dialog, type DialogProps } from './dialog/Dialog.tsx'
 export { Menu, MenuDivider, MenuItem, type MenuItemProps, type MenuProps } from './menu/Menu.tsx'
-export { Snackbar } from './snackbar/Snackbar.tsx'
-export { hideToast, toast, toastStore, useToast, type ToastOptions, type ToastState } from './snackbar/toast.ts'
+export { Snackbar, type SnackbarProps } from './snackbar/Snackbar.tsx'
+export {
+  hideToast,
+  toast,
+  toastStore,
+  updateToast,
+  useToast,
+  type ToastAction,
+  type ToastOptions,
+  type ToastPatch,
+  type ToastProgress,
+  type ToastState,
+} from './snackbar/toast.ts'
 
 export { Icon } from './icon/Icon.tsx'
 export {

@@ -4,53 +4,140 @@
  * sets `display`, so the UA's display: none keeps it hidden while closed.
  */
 @layer m3e.components {
-  .m3e-snackbar {
-    --m3e-snackbar-shift: 12px;
-
-    position: fixed;
-    inset: auto 0 var(--m3e-snackbar-offset, 24px);
+  /*
+   * The tonal floating surface: shape, colour, padding and type. Reusable for an app's own
+   * floating cards; a direct child [data-part='icon'] becomes the tonal icon tile.
+   */
+  .m3e-snackbar-surface {
     box-sizing: border-box;
-    inline-size: fit-content;
-    max-inline-size: min(90vw, 560px);
-    min-block-size: 48px;
-    margin: 0 auto;
-    padding: 4px 8px 4px 16px;
+    padding: 8px;
     border: 0;
-    border-radius: var(--md-sys-shape-corner-extra-small);
-    background: var(--md-sys-color-inverse-surface);
-    color: var(--md-sys-color-inverse-on-surface);
+    border-radius: var(--md-sys-shape-corner-extra-large);
+    background: var(--md-sys-color-surface-container-high);
+    color: var(--md-sys-color-on-surface);
     box-shadow: var(--md-sys-elevation-level3);
-    overflow: visible;
+    /* No shadows in forced colours: a transparent outline becomes a visible edge there. */
+    outline: 1px solid transparent;
+    outline-offset: -1px;
     font-family: var(--md-sys-typescale-body-medium-font);
     font-size: var(--md-sys-typescale-body-medium-size);
     line-height: var(--md-sys-typescale-body-medium-line-height);
     font-weight: var(--md-sys-typescale-body-medium-weight);
     letter-spacing: var(--md-sys-typescale-body-medium-tracking);
 
-    /* Closed. `bottom` follows offset changes (e.g. other floating UI growing) smoothly. */
+    & > [data-part='icon'] {
+      display: grid;
+      flex: none;
+      place-items: center;
+      inline-size: 40px;
+      block-size: 40px;
+      border-radius: var(--md-sys-shape-corner-medium);
+      background: var(--md-sys-color-secondary-container);
+      color: var(--md-sys-color-on-secondary-container);
+    }
+  }
+
+  .m3e-snackbar {
+    --m3e-snackbar-shift: 12px;
+
+    position: fixed;
+    inset-block: auto var(--m3e-snackbar-offset, 24px);
+    inset-inline: 0;
+    inline-size: fit-content;
+    max-inline-size: min(560px, 100% - 32px);
+    min-block-size: 56px;
+    margin: 0 auto;
+    overflow: visible;
+
+    /* Closed. The offsets follow changes (e.g. other floating UI growing) smoothly. */
     opacity: 0;
-    transition-property: opacity, translate, bottom;
-    transition-duration: var(--md-sys-motion-duration-short3), var(--md-sys-motion-duration-short3), var(--md-sys-motion-spring-default-spatial-duration);
-    transition-timing-function: var(--md-sys-motion-easing-standard-accelerate), var(--md-sys-motion-easing-standard-accelerate), var(--md-sys-motion-spring-default-spatial);
+    transition-property: opacity, translate, bottom, top;
+    transition-duration:
+      var(--md-sys-motion-duration-short3),
+      var(--md-sys-motion-duration-short3),
+      var(--md-sys-motion-spring-default-spatial-duration),
+      var(--md-sys-motion-spring-default-spatial-duration);
+    transition-timing-function:
+      var(--md-sys-motion-easing-standard-accelerate),
+      var(--md-sys-motion-easing-standard-accelerate),
+      var(--md-sys-motion-spring-default-spatial),
+      var(--md-sys-motion-spring-default-spatial);
 
     &[data-placement='top'] {
       --m3e-snackbar-shift: -12px;
-      inset: var(--m3e-snackbar-top, 64px) 0 auto;
+      inset-block: var(--m3e-snackbar-top, 64px) auto;
     }
     &:popover-open {
       display: flex;
       align-items: center;
       gap: 8px;
     }
+    &:not(:popover-open),
     &[data-closing] { pointer-events: none; }
 
-    & > [data-part='message'] {
+    & > [data-part='body'] {
+      display: grid;
+      flex: 1 1 0;
+      gap: 4px;
       min-inline-size: 0;
-      padding-block: 10px;
+      padding: 8px;
+
+      /* The gap already separates the actions. */
+      &:not(:last-child) { padding-inline-end: 0; }
+    }
+    & [data-part='message'] {
+      /* Two lines at most; the full text stays in the DOM for assistive tech and in the title. */
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      overflow: hidden;
       overflow-wrap: anywhere;
+      text-wrap: balance;
       transition: opacity var(--md-sys-motion-spring-default-effects-duration) var(--md-sys-motion-spring-default-effects);
 
       @starting-style { opacity: 0; }
+    }
+    & [data-part='progress'] {
+      min-inline-size: min(200px, 50vw);
+
+      & > .m3e-wavy { block-size: 10px; }
+    }
+
+    & > [data-part='actions'] {
+      display: flex;
+      flex: none;
+      gap: 8px;
+
+      & > .m3e-button {
+        font-size: var(--md-sys-typescale-label-large-size);
+        line-height: var(--md-sys-typescale-label-large-line-height);
+      }
+      /* Locked while a `dismiss: false` action runs; still focusable, so focus is not lost. */
+      & > .m3e-button[aria-disabled='true'] {
+        --m3e-button-content: color-mix(in srgb, var(--md-sys-color-on-surface) var(--m3e-disabled-content-opacity), transparent);
+        cursor: progress;
+
+        &:not([data-variant='text']) {
+          --m3e-button-container: color-mix(in srgb, var(--md-sys-color-on-surface) var(--m3e-disabled-container-opacity), transparent);
+        }
+        &::before { opacity: 0; }
+      }
+    }
+
+    /* Narrow windows: span the width, actions on their own row (< 480 px), one per row (< 320 px). */
+    &:not([data-layout='inline']) {
+      inset-inline: 16px;
+      inline-size: auto;
+      flex-wrap: wrap;
+
+      & > [data-part='actions'] {
+        flex-basis: 100%;
+        justify-content: flex-end;
+      }
+    }
+    &[data-layout='stacked'] > [data-part='actions'] {
+      flex-direction: column;
+      align-items: stretch;
     }
   }
 
@@ -60,9 +147,11 @@
     transition-duration:
       var(--md-sys-motion-spring-default-effects-duration),
       var(--md-sys-motion-spring-default-spatial-duration),
+      var(--md-sys-motion-spring-default-spatial-duration),
       var(--md-sys-motion-spring-default-spatial-duration);
     transition-timing-function:
       var(--md-sys-motion-spring-default-effects),
+      var(--md-sys-motion-spring-default-spatial),
       var(--md-sys-motion-spring-default-spatial),
       var(--md-sys-motion-spring-default-spatial);
 
@@ -77,41 +166,8 @@
 
   @supports (overlay: auto) {
     .m3e-snackbar {
-      transition-property: opacity, translate, bottom, display, overlay;
+      transition-property: opacity, translate, bottom, top, display, overlay;
       transition-behavior: allow-discrete;
     }
-  }
-
-  .m3e-snackbar-action {
-    position: relative;
-    flex-shrink: 0;
-    min-block-size: 40px;
-    margin: 0;
-    padding: 0 12px;
-    border: 0;
-    border-radius: 20px;
-    background: none;
-    color: var(--md-sys-color-inverse-primary);
-    font-family: var(--md-sys-typescale-label-large-font);
-    font-size: var(--md-sys-typescale-label-large-size);
-    line-height: var(--md-sys-typescale-label-large-line-height);
-    font-weight: var(--md-sys-typescale-label-large-weight);
-    letter-spacing: var(--md-sys-typescale-label-large-tracking);
-    cursor: pointer;
-
-    &::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: inherit;
-      background: currentColor;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity var(--md-sys-motion-spring-fast-effects-duration) var(--md-sys-motion-spring-fast-effects);
-    }
-    &:hover::before { opacity: var(--md-sys-state-hover-state-layer-opacity); }
-    &:focus-visible::before { opacity: var(--md-sys-state-focus-state-layer-opacity); }
-    &:active::before { opacity: var(--md-sys-state-pressed-state-layer-opacity); }
-    &:focus-visible { --m3e-focus-ring-color: var(--md-sys-color-inverse-primary); }
   }
 }

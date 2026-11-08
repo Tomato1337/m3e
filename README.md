@@ -5,7 +5,7 @@
 | Пакет | Что внутри |
 | --- | --- |
 | `@tomato1337/m3e-tokens` | CSS-токены (цвет, типографика, формы, тени, состояния, движение) в слое `m3e.tokens`; TS-утилиты: схема из seed-цвета (`schemeVars`), гармонизированные свои цвета (`customColorTones`), пружины M3 Expressive → `linear()` (`springEasing`). |
-| `@tomato1337/m3e-react` | React 19 компоненты: `Dialog`, `Menu`, `Snackbar`/`toast`, `IconButton`, `Button`, `ButtonGroup`/`ToggleButton`/`Segmented`, `Chip`, `Switch`, `Spinner`, `WavyProgress`, `WavySpinner`, `Icon`, тултипы `data-tip`, `Presence`/`usePresence` и классы `m3e-motion-*`. |
+| `@tomato1337/m3e-react` | React 19 компоненты: `Dialog`, `Menu`, `Snackbar`/`toast`/`updateToast`, `IconButton`, `Button`, `ButtonGroup`/`ToggleButton`/`Segmented`, `Chip`, `Switch`, `Spinner`, `WavyProgress`, `WavySpinner`, `Icon`, тултипы `data-tip`, `Presence`/`usePresence` и классы `m3e-motion-*`. |
 | `apps/playground` | Витрина всех компонентов и анимаций (`npm run dev`). |
 
 ## Главное: анимации входа **и выхода**
@@ -84,10 +84,18 @@ npm install                                           # вернуть верс�
 
 Первую версию нового пакета npm принимает только вручную: `npm login`, затем `npm publish --workspace packages/tokens --workspace packages/react`; после этого на npmjs.com в настройках каждого пакета включается Trusted publishing → GitHub Actions (`Tomato1337/m3e`, `publish.yml`).
 
+### 0.3.0 — snackbar для задач (ломающее изменение)
+
+- `action: { label, run }` удалён, вместо него `actions: [{ label, run, variant?, dismiss? }]` — одна или две кнопки (`variant: 'tonal' | 'text'`). Перенос: `action: a` → `actions: [a]`. `run` может вернуть `Promise`.
+- `toast()` возвращает id сообщения. `updateToast(id, { message?, options? })` меняет текущее сообщение без новой анимации входа, без повторной озвучки и без сброса таймера (сбрасывает только изменённый `durationMs`); для старого id ничего не делает. `hideToast(id)` скрывает только своё сообщение, так что поздний колбэк не закроет новое.
+- `durationMs: null` — без автоскрытия; `icon` — тональная плитка со значком; `progress: { value, label, clock? }` — волнистый прогресс (`clock` читается каждый кадр без рендера React); `onInteractionChange(paused)` — пауза, пока на снэкбаре указатель или фокус.
+- `Snackbar` получил `placement` и `topOffset` (рядом с `bottomOffset`). Вид — тональная поверхность `surface-container-high`; её рецепт вынесен в класс `.m3e-snackbar-surface` для своих плавающих карточек. Класс `.m3e-snackbar-action` удалён.
+
 ## Компоненты: важные договорённости
 
 - `Dialog`: нативный модальный `<dialog>` — фокус, инертность страницы, Esc, возврат фокуса делает браузер. Безопасное действие помечайте `data-autofocus`. `onClose` — запрос закрытия (Esc, «назад», клик по фону при `dismissible`); закрытие и анимация — через `open={false}` или `Presence`. Не вешайте на сам `<dialog>` утилиты `flex`/`grid` — открытый диалог уже flex-колонка.
 - Пока открыт модальный диалог, всё вне него инертно — в том числе snackbar. Поэтому озвучка идёт через `announce()`: его live-регион сам переезжает внутрь открытого модального окна.
+- Snackbar один на приложение, новое сообщение заменяет текущее (очереди нет). Таймер скрытия стоит на паузе, пока на снэкбаре указатель или фокус, и продолжает с остатка. Кнопка без `dismiss: false` сначала скрывает сообщение, потом выполняет действие; с `dismiss: false` сообщение остаётся, а обе кнопки заблокированы (`aria-disabled`) и таймер стоит до завершения `run` — скрыть или обновить сообщение должен сам вызывающий код. Ошибка `run` уходит в `reportError`, сообщение остаётся. `updateToast` не озвучивает изменения — важную смену этапа озвучьте сами через `announce()`. Уже 480 px кнопки переносятся под текст, уже 320 px — встают в столбик (`data-layout`); текст длиннее двух строк обрезается, полный остаётся в DOM и в `title`.
 - `Menu`: `popover="manual"`, позиционирование CSS Anchor Positioning, где оно есть, иначе из скрипта (WebKit). Открытие с клавиатуры переводит фокус на первый пункт, Esc возвращает его на кнопку, Tab закрывает. У триггера — `aria-haspopup="menu"` и `aria-expanded`.
 - `IconButton`: подпись (`label`) — это и `aria-label`, и тултип. `selected` → `aria-pressed` (кнопка-переключатель).
 - Классы — `.m3e-<компонент>`, варианты и части — атрибуты `data-variant`, `data-size`, `data-part`; без BEM.

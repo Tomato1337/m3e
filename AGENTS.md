@@ -74,8 +74,9 @@ no `overscroll-behavior` on non-scrollable boxes.
 
 ## Verifying motion
 
-Unit tests (vitest, jsdom) cover `Presence`, `animateExit`, the toast store, `announce`, springs
-and colour generation. Exit motion itself must be checked in real engines: build the playground,
+Unit tests (vitest, jsdom) cover `Presence`, `animateExit`, the snackbar host (message identity,
+dismissal timer, hover/focus pause, action locking, layout), `announce`, springs and colour generation.
+Exit motion itself must be checked in real engines: build the playground,
 serve `apps/playground/dist`, then sample `getComputedStyle(el).opacity` (and `translate`/`scale`)
 while closing — values strictly between 0 and 1 mid-exit, the element removed afterwards, focus
 back on the opener. WebKitGTK is driven through `WebKit2` GObject bindings under `xvfb-run`;

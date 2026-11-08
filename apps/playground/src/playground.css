@@ -23,6 +23,8 @@
   }
   h1, h2 { margin: 0; }
   .row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+  section > p { margin: 0; }
+  .hint { color: var(--md-sys-color-on-surface-variant); }
   .anchor { position: relative; display: inline-block; }
   .card {
     inline-size: 240px;

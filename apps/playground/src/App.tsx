@@ -20,10 +20,15 @@ import {
   WavySpinner,
 } from '@tomato1337/m3e-react'
 import { useEffect, useRef, useState } from 'react'
+import { startTask } from './taskDemo.ts'
 
 const MODES = [
   { value: 'expressive', label: 'Expressive' },
   { value: 'standard', label: 'Standard' },
+] as const
+const PLACES = [
+  { value: 'bottom', label: 'Снизу' },
+  { value: 'top', label: 'Сверху' },
 ] as const
 
 export function App() {
@@ -39,6 +44,9 @@ export function App() {
   const [langs, setLangs] = useState({ en: true, ru: false })
   const [autoplay, setAutoplay] = useState(true)
   const [value, setValue] = useState(0.35)
+  const [place, setPlace] = useState<'bottom' | 'top'>('bottom')
+  const [held, setHeld] = useState(false)
+  const [editor, setEditor] = useState(false)
 
   useEffect(() => {
     applyVars(schemeVars(seed, { dark }))
@@ -115,10 +123,26 @@ export function App() {
               <MenuItem label="Недоступно" disabled onClick={() => {}} />
             </Menu>
           </span>
-          <Button id="toast" variant="text" onClick={() => toast('Удалено из недавних', { action: { label: 'Отменить', run: () => toast('Восстановлено') }, durationMs: 8000 })}>
-            Snackbar
-          </Button>
         </div>
+      </section>
+
+      <section aria-labelledby="snack-title">
+        <h2 id="snack-title" className="type-title-large">Snackbar</h2>
+        <div className="row">
+          <Button id="toast" variant="text" onClick={() => toast('Удалено из недавних', { actions: [{ label: 'Отменить', run: () => { toast('Восстановлено') } }], durationMs: 8000 })}>
+            Простой
+          </Button>
+          <Button id="task" variant="tonal" icon="add_card" onClick={() => startTask({ onHeld: setHeld, onEdit: () => setEditor(true) })}>
+            Задача с отменой
+          </Button>
+          <Segmented label="Место снэкбара" value={place} options={PLACES} onChange={setPlace} />
+        </div>
+        <p className="type-body-medium">
+          Таймер: <output id="task-state">{held ? 'на паузе — указатель или фокус на снэкбаре' : 'идёт'}</output>
+        </p>
+        <p className="type-body-small hint">
+          Уже 480 px кнопки уходят под текст, уже 320 px — в столбик. Текст длиннее двух строк обрезается, полностью он в title.
+        </p>
       </section>
 
       <section aria-labelledby="motion-title">
@@ -166,6 +190,13 @@ export function App() {
           <Button variant="text" onClick={() => { setConfirm(false); toast('Карточка удалена') }}>Удалить</Button>
         </div>
       </Dialog>
+      <Dialog id="editor" open={editor} aria-labelledby="editor-title" onClose={() => setEditor(false)}>
+        <h2 id="editor-title" className="type-headline-small">Карточка «excited»</h2>
+        <p className="type-body-medium">Редактор открыт по кнопке снэкбара, добавление ждёт сохранения.</p>
+        <div className="actions">
+          <Button variant="text" data-autofocus onClick={() => setEditor(false)}>Закрыть</Button>
+        </div>
+      </Dialog>
 
       {side.mounted && (
         <aside id="panel" ref={sideRef} className="panel m3e-motion-from-right" aria-label="Боковая панель">
@@ -174,7 +205,7 @@ export function App() {
         </aside>
       )}
 
-      <Snackbar />
+      <Snackbar placement={place} topOffset={16} />
     </main>
   )
 }
