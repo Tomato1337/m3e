@@ -36,6 +36,9 @@ export { Button, type ButtonProps, type ButtonSize, type ButtonVariant } from '.
 export { ButtonGroup, Segmented, ToggleButton, type ButtonGroupProps } from './button/ButtonGroup.tsx'
 export { Chip } from './chip/Chip.tsx'
 export { Switch, SwitchIndicator } from './switch/Switch.tsx'
+export { Field, fieldErrorId, fieldHintId, type FieldProps } from './field/Field.tsx'
+export { TextField, type FieldControlProps, type InputVariant, type TextFieldProps } from './field/TextField.tsx'
+export { Select, type SelectProps } from './field/Select.tsx'
 
 export { Spinner } from './progress/Spinner.tsx'
 export { WavyProgress } from './progress/WavyProgress.tsx'
