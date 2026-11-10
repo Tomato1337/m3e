@@ -1,0 +1,35 @@
+/*
+ * Checkbox and radio (Checkbox.tsx, Radio.tsx): native controls at the system size, tinted with
+ * `accent-color`. A label row puts the control on the first text line and lets the label wrap.
+ */
+@layer m3e.components {
+  :is(.m3e-checkbox, .m3e-radio) {
+    flex-shrink: 0;
+    margin: 0;
+    accent-color: var(--m3e-choice-accent, var(--md-sys-color-primary));
+    cursor: pointer;
+
+    &:disabled { cursor: default; }
+  }
+
+  .m3e-choice {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding-block: 4px;
+    cursor: pointer;
+    font-family: var(--md-sys-typescale-body-medium-font);
+    font-size: var(--md-sys-typescale-body-medium-size);
+    line-height: var(--md-sys-typescale-body-medium-line-height);
+    font-weight: var(--md-sys-typescale-body-medium-weight);
+    letter-spacing: var(--md-sys-typescale-body-medium-tracking);
+
+    & > :is(.m3e-checkbox, .m3e-radio) { margin-block-start: 4px; }
+    & > span { min-inline-size: 0; }
+
+    &[data-disabled] {
+      cursor: default;
+      color: color-mix(in srgb, var(--md-sys-color-on-surface) var(--m3e-disabled-content-opacity), transparent);
+    }
+  }
+}

@@ -2,6 +2,7 @@ import { applyVars, schemeVars } from '@tomato1337/m3e-tokens'
 import {
   Button,
   ButtonGroup,
+  Checkbox,
   Chip,
   Dialog,
   IconButton,
@@ -9,6 +10,7 @@ import {
   MenuDivider,
   MenuItem,
   Presence,
+  Radio,
   Segmented,
   Select,
   Snackbar,
@@ -37,6 +39,11 @@ const PAGES = [
   { value: 'words', label: 'Слова' },
   { value: 'book', label: 'Книга' },
 ] as const
+const SPEEDS = [
+  { value: '0.75', label: '0.75×' },
+  { value: '1', label: 'Обычная' },
+  { value: '1.25', label: '1.25×' },
+] as const
 
 export function App() {
   const [seed, setSeed] = useState('#6750a4')
@@ -56,6 +63,8 @@ export function App() {
   const [editor, setEditor] = useState(false)
   const [page, setPage] = useState<(typeof PAGES)[number]['value']>('lessons')
   const [secret, setSecret] = useState(false)
+  const [cards, setCards] = useState([true, false])
+  const [speed, setSpeed] = useState<(typeof SPEEDS)[number]['value']>('1')
 
   useEffect(() => {
     applyVars(schemeVars(seed, { dark }))
@@ -166,6 +175,32 @@ export function App() {
           <Chip label="Недоступно" selected={false} disabled />
         </div>
         <Switch label="Автовоспроизведение" checked={autoplay} onChange={setAutoplay} />
+        <div className="choices">
+          <div>
+            <Checkbox
+              label="Все карточки"
+              checked={cards.every(Boolean)}
+              indeterminate={cards.some(Boolean) && !cards.every(Boolean)}
+              onChange={(v) => setCards(cards.map(() => v))}
+            />
+            {['excited', 'take off'].map((w, i) => (
+              <Checkbox
+                key={w}
+                className="nested"
+                label={<>Добавить <b>{w}</b> в колоду: пример из фильма и перевод займут несколько строк, флажок стоит по первой</>}
+                checked={cards[i]!}
+                onChange={(v) => setCards(cards.map((c, j) => (j === i ? v : c)))}
+              />
+            ))}
+            <Checkbox label="Недоступно" checked disabled onChange={() => {}} />
+          </div>
+          <div role="radiogroup" aria-label="Скорость">
+            {SPEEDS.map((s) => (
+              <Radio key={s.value} name="speed" value={s.value} label={s.label} checked={speed === s.value} onChange={() => setSpeed(s.value)} />
+            ))}
+            <Radio name="speed-off" label="Недоступно" checked={false} disabled onChange={() => {}} />
+          </div>
+        </div>
       </section>
 
       <section aria-labelledby="over-title">
