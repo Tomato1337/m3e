@@ -1,6 +1,7 @@
 /*
- * Filter chip (Chip.tsx): 32 px, small corners. The check mark is always rendered and grows in or
- * out with the selection, so deselecting animates instead of the label jumping back.
+ * Filter chip (Chip.tsx) and status chip (StatusChip.tsx). The filter chip is 32 px with small
+ * corners; its check mark is always rendered and grows in or out with the selection, so
+ * deselecting animates instead of the label jumping back.
  */
 @layer m3e.components {
   .m3e-chip {
@@ -97,6 +98,59 @@
     /* Reduced motion: the mark just fades; the width change is instant. */
     @media (prefers-reduced-motion: reduce) {
       & > [data-part='check'] { transition-duration: 0s, 0s, 0s, var(--md-sys-motion-spring-fast-effects-duration); }
+    }
+  }
+
+  /*
+   * Status chip (StatusChip.tsx): a non-interactive pill, about 20 px tall at `sm`. Tones set the
+   * container/content pair on the element, so an app's own tone overrides the two variables from a
+   * later layer (or a utility).
+   */
+  .m3e-status-chip {
+    --m3e-status-chip-container: var(--md-sys-color-surface-container-highest);
+    --m3e-status-chip-content: var(--md-sys-color-on-surface-variant);
+
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    box-sizing: border-box;
+    max-inline-size: 100%;
+    padding: 2px 8px;
+    border-radius: var(--md-sys-shape-corner-full);
+    background-color: var(--m3e-status-chip-container);
+    color: var(--m3e-status-chip-content);
+    font-family: var(--md-sys-typescale-label-small-font);
+    font-size: var(--md-sys-typescale-label-small-size);
+    line-height: var(--md-sys-typescale-label-small-line-height);
+    font-weight: var(--md-sys-typescale-label-small-weight);
+    letter-spacing: var(--md-sys-typescale-label-small-tracking);
+    white-space: nowrap;
+    vertical-align: middle;
+
+    &[data-size='md'] {
+      padding: 4px 12px;
+      font-family: var(--md-sys-typescale-label-medium-font);
+      font-size: var(--md-sys-typescale-label-medium-size);
+      line-height: var(--md-sys-typescale-label-medium-line-height);
+      font-weight: var(--md-sys-typescale-label-medium-weight);
+      letter-spacing: var(--md-sys-typescale-label-medium-tracking);
+    }
+
+    &[data-tone='primary'] {
+      --m3e-status-chip-container: var(--md-sys-color-primary-container);
+      --m3e-status-chip-content: var(--md-sys-color-on-primary-container);
+    }
+    &[data-tone='secondary'] {
+      --m3e-status-chip-container: var(--md-sys-color-secondary-container);
+      --m3e-status-chip-content: var(--md-sys-color-on-secondary-container);
+    }
+    &[data-tone='tertiary'] {
+      --m3e-status-chip-container: var(--md-sys-color-tertiary-container);
+      --m3e-status-chip-content: var(--md-sys-color-on-tertiary-container);
+    }
+    &[data-tone='error'] {
+      --m3e-status-chip-container: var(--md-sys-color-error-container);
+      --m3e-status-chip-content: var(--md-sys-color-on-error-container);
     }
   }
 }

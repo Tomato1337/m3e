@@ -35,6 +35,8 @@ export {
 export { Button, type ButtonProps, type ButtonSize, type ButtonVariant } from './button/Button.tsx'
 export { ButtonGroup, Segmented, ToggleButton, type ButtonGroupProps } from './button/ButtonGroup.tsx'
 export { Chip } from './chip/Chip.tsx'
+export { StatusChip, type StatusChipProps, type StatusChipSize, type StatusTone } from './chip/StatusChip.tsx'
+export { Card, type CardProps, type CardVariant } from './card/Card.tsx'
 export { Switch, SwitchIndicator } from './switch/Switch.tsx'
 export { Checkbox, type ChoiceProps } from './checkbox/Checkbox.tsx'
 export { Radio, type RadioProps } from './checkbox/Radio.tsx'
