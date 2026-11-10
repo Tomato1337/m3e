@@ -14,7 +14,7 @@
     margin: 0 auto;
     padding: 32px 24px 160px;
   }
-  section {
+  main > section {
     display: grid;
     gap: 16px;
     padding: 24px;
@@ -23,7 +23,7 @@
   }
   h1, h2 { margin: 0; }
   .row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
-  section > p { margin: 0; }
+  main > section > p { margin: 0; }
   .hint { color: var(--md-sys-color-on-surface-variant); }
   .anchor { position: relative; display: inline-block; }
   .card {
@@ -50,4 +50,20 @@
   .slider-row { flex-wrap: nowrap; gap: 24px; }
   .slider-row > :first-child { flex: 3; }
   .slider-row > :last-child { flex: 1; }
+  /* Dialog-like backdrop, so the filled card reads as in the apps. */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    align-items: start;
+    gap: 16px;
+    padding: 16px;
+    border-radius: var(--md-sys-shape-corner-extra-large);
+    background: var(--md-sys-color-surface-container-high);
+  }
+  .cards p { margin: 0; }
+  /* An app tone: only the two variables. */
+  .tone-success {
+    --m3e-status-chip-container: light-dark(#c8f0c8, #1f4d24);
+    --m3e-status-chip-content: light-dark(#0f3d14, #c8f0c8);
+  }
 }

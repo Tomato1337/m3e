@@ -2,6 +2,7 @@ import { applyVars, schemeVars } from '@tomato1337/m3e-tokens'
 import {
   Button,
   ButtonGroup,
+  Card,
   Checkbox,
   Chip,
   Dialog,
@@ -16,6 +17,7 @@ import {
   Slider,
   Snackbar,
   Spinner,
+  StatusChip,
   Switch,
   TextField,
   toast,
@@ -201,6 +203,35 @@ export function App() {
             ))}
             <Radio name="speed-off" label="Недоступно" checked={false} disabled onChange={() => {}} />
           </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="cards-title">
+        <h2 id="cards-title" className="type-title-large">Карточки и статусы</h2>
+        <div className="cards">
+          <Card title="Anki" label="Настройки Anki">
+            <div className="row">
+              <span className="type-body-medium">Подключение</span>
+              <StatusChip>не настроено</StatusChip>
+            </div>
+            <TextField label="Колода" defaultValue="English::Movies" />
+          </Card>
+          <Card variant="outlined" title="Картинка">
+            <p className="type-body-medium">Блок с обводкой внутри формы: отступ 12 px, радиус 12 px.</p>
+          </Card>
+        </div>
+        <div className="row">
+          <StatusChip>neutral</StatusChip>
+          <StatusChip tone="primary">primary</StatusChip>
+          <StatusChip tone="secondary">secondary</StatusChip>
+          <StatusChip tone="tertiary">tertiary</StatusChip>
+          <StatusChip tone="error" icon="error">error</StatusChip>
+          <StatusChip className="tone-success" icon="check_circle">своя: success</StatusChip>
+        </div>
+        <div className="row">
+          <StatusChip size="md">md · neutral</StatusChip>
+          <StatusChip size="md" tone="tertiary" icon="bolt">md · вес 3</StatusChip>
+          <StatusChip size="md" tone="error">md · error</StatusChip>
         </div>
       </section>
 
