@@ -30,6 +30,11 @@ const PLACES = [
   { value: 'bottom', label: 'Снизу' },
   { value: 'top', label: 'Сверху' },
 ] as const
+const PAGES = [
+  { value: 'lessons', label: 'Уроки' },
+  { value: 'words', label: 'Слова' },
+  { value: 'book', label: 'Книга' },
+] as const
 
 export function App() {
   const [seed, setSeed] = useState('#6750a4')
@@ -47,6 +52,7 @@ export function App() {
   const [place, setPlace] = useState<'bottom' | 'top'>('bottom')
   const [held, setHeld] = useState(false)
   const [editor, setEditor] = useState(false)
+  const [page, setPage] = useState<(typeof PAGES)[number]['value']>('lessons')
 
   useEffect(() => {
     applyVars(schemeVars(seed, { dark }))
@@ -92,6 +98,20 @@ export function App() {
         <ButtonGroup label="Языки субтитров" connected>
           <ToggleButton selected={langs.en} onClick={() => setLangs((l) => ({ ...l, en: !l.en }))}>EN</ToggleButton>
           <ToggleButton selected={langs.ru} onClick={() => setLangs((l) => ({ ...l, ru: !l.ru }))}>РУ</ToggleButton>
+        </ButtonGroup>
+        <div className="row">
+          <Button href="https://m3.material.io/components/buttons/overview" target="_blank" rel="noreferrer" variant="outlined" icon="open_in_new">
+            Ссылка-кнопка
+          </Button>
+          <IconButton href="#buttons-title" icon="link" label="Ссылка с иконкой" variant="tonal" />
+          <Button href="#buttons-title" variant="text" disabled>Недоступная ссылка</Button>
+        </div>
+        <ButtonGroup label="Разделы" connected>
+          {PAGES.map((p) => (
+            <ToggleButton key={p.value} href={`#${p.value}`} selected={page === p.value} onClick={() => setPage(p.value)}>
+              {p.label}
+            </ToggleButton>
+          ))}
         </ButtonGroup>
       </section>
 

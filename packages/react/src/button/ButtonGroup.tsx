@@ -1,6 +1,7 @@
 import type { HTMLAttributes, ReactNode } from 'react'
 import { cx } from '../cx.ts'
 import { Button, type ButtonProps } from './Button.tsx'
+import type { DistributiveOmit } from './link.ts'
 
 export type ButtonGroupProps = HTMLAttributes<HTMLDivElement> & {
   /** Accessible name of the group. */
@@ -22,8 +23,11 @@ export function ButtonGroup({ label, connected, className, children, ...rest }: 
   )
 }
 
-/** A two-state button for groups: `selected` ⇒ aria-pressed. */
-export function ToggleButton({ selected, ...rest }: Omit<ButtonProps, 'variant' | 'selected'> & { selected: boolean }) {
+/**
+ * A two-state button for groups: `selected` ⇒ aria-pressed. With `href` it is a link and `selected`
+ * marks the current page (aria-current), so a connected group can be navigation.
+ */
+export function ToggleButton({ selected, ...rest }: DistributiveOmit<ButtonProps, 'variant' | 'selected'> & { selected: boolean }) {
   return <Button {...rest} variant="tonal" selected={selected} data-toggle="" />
 }
 
