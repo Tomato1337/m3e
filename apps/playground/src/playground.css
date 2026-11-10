@@ -45,4 +45,6 @@
   .wave { block-size: 12px; inline-size: 100%; }
   .fields { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); align-items: start; gap: 16px; }
   .search { max-inline-size: 320px; border-radius: var(--md-sys-shape-corner-full); }
+  .choices { display: grid; grid-template-columns: 2fr 1fr; align-items: start; gap: 24px; }
+  .nested { margin-inline-start: 24px; }
 }
