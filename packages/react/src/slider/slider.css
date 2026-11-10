@@ -1,0 +1,52 @@
+/*
+ * Slider (Slider.tsx) on a native range input. Only ::-webkit-slider-* pseudos: both target
+ * engines (WebKit, Chromium) know them. The passed part is a gradient on the track up to
+ * --m3e-slider-fill (0…1, written by the component), mirrored for right-to-left.
+ */
+@layer m3e.components {
+  .m3e-slider {
+    --m3e-slider-active: var(--md-sys-color-primary);
+    --m3e-slider-track: var(--md-sys-color-secondary-container);
+    --m3e-slider-fill: 0;
+    --m3e-slider-direction: to right;
+
+    appearance: none;
+    display: block;
+    box-sizing: border-box;
+    inline-size: 100%;
+    block-size: 24px;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+
+    &:dir(rtl) { --m3e-slider-direction: to left; }
+
+    &::-webkit-slider-runnable-track {
+      block-size: 4px;
+      border-radius: 2px;
+      background: linear-gradient(
+        var(--m3e-slider-direction),
+        var(--m3e-slider-active) calc(var(--m3e-slider-fill) * 100%),
+        var(--m3e-slider-track) calc(var(--m3e-slider-fill) * 100%)
+      );
+    }
+    &::-webkit-slider-thumb {
+      appearance: none;
+      box-sizing: border-box;
+      inline-size: 4px;
+      block-size: 20px;
+      margin-block-start: -8px;
+      border: 0;
+      border-radius: 2px;
+      background: var(--m3e-slider-active);
+    }
+
+    &:disabled {
+      cursor: default;
+      --m3e-slider-active: color-mix(in srgb, var(--md-sys-color-on-surface) var(--m3e-disabled-content-opacity), transparent);
+      --m3e-slider-track: color-mix(in srgb, var(--md-sys-color-on-surface) var(--m3e-disabled-container-opacity), transparent);
+    }
+  }
+}

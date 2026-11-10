@@ -13,6 +13,7 @@ import {
   Radio,
   Segmented,
   Select,
+  Slider,
   Snackbar,
   Spinner,
   Switch,
@@ -265,7 +266,10 @@ export function App() {
           <Spinner size={24} width={3} />
           <WavySpinner label="Поиск субтитров" />
         </div>
-        <input type="range" min={0} max={1} step={0.01} value={value} aria-label="Значение" onChange={(e) => setValue(Number(e.target.value))} />
+        <div className="row slider-row">
+          <Slider min={0} max={1} step={0.01} value={value} label="Значение" onChange={setValue} />
+          <Slider value={40} label="Недоступно" disabled onChange={() => {}} />
+        </div>
         <WavyProgress className="wave" value={value} amp={3} len={24} stroke={4} animated={false} />
       </section>
 

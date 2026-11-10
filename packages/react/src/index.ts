@@ -41,6 +41,7 @@ export { Radio, type RadioProps } from './checkbox/Radio.tsx'
 export { Field, fieldErrorId, fieldHintId, type FieldProps } from './field/Field.tsx'
 export { TextField, type FieldControlProps, type InputVariant, type TextFieldProps } from './field/TextField.tsx'
 export { Select, type SelectProps } from './field/Select.tsx'
+export { Slider, sliderFill, type SliderProps } from './slider/Slider.tsx'
 
 export { Spinner } from './progress/Spinner.tsx'
 export { WavyProgress } from './progress/WavyProgress.tsx'
