@@ -80,9 +80,20 @@ npm install                                           # вернуть верс�
 
 ## Версии
 
-Версия — поле `version` в `packages/*/package.json` (у обоих пакетов одна) и git-тег `v<версия>`. Выпуск: поднять версию в обоих `package.json` (и зависимость `@tomato1337/m3e-react` → `@tomato1337/m3e-tokens`), `npm install`, закоммитить, `git tag v0.3.0 && git push origin main v0.3.0`. Workflow `.github/workflows/publish.yml` прогоняет `npm run check` и публикует пакеты через trusted publishing (OIDC, без токена). Ломающие изменения API или токенов до 1.0 — новая минорная версия; в приложении после обновления прогоните `tsc -b` и сборку.
+Версия — поле `version` в `packages/*/package.json` (у обоих пакетов одна) и git-тег `v<версия>`. Выпуск: поднять версию в обоих `package.json` (и зависимость `@tomato1337/m3e-react` → `@tomato1337/m3e-tokens`), `npm install`, закоммитить, `git tag v0.4.0 && git push origin main v0.4.0`. Workflow `.github/workflows/publish.yml` прогоняет `npm run check` и публикует пакеты через trusted publishing (OIDC, без токена). Ломающие изменения API или токенов до 1.0 — новая минорная версия; в приложении после обновления прогоните `tsc -b` и сборку.
 
 Первую версию нового пакета npm принимает только вручную: `npm login`, затем `npm publish --workspace packages/tokens --workspace packages/react`; после этого на npmjs.com в настройках каждого пакета включается Trusted publishing → GitHub Actions (`Tomato1337/m3e`, `publish.yml`).
+
+### 0.4.0 — поля, флажки, ползунок, карточки, ссылки-кнопки
+
+Только добавления: приложение на 0.3.x обновляется без правок, существующие компоненты выглядят как раньше. Токены не менялись.
+
+- `Button`, `IconButton` и `ToggleButton` принимают `href` и тогда рендерят ссылку `<a>` того же вида.
+- Поля: класс `.m3e-input` и компоненты `Field`, `TextField`, `Select`.
+- `Checkbox` и `Radio` — нативные элементы с `accent-color`.
+- `Slider` — нативный `input type="range"`.
+- `Card` (`filled`, `outlined`) и `StatusChip` (неинтерактивная пилюля статуса с тонами).
+- Типы: `ButtonProps` и `IconButtonProps` стали объединением «кнопка | ссылка», `ref` — `HTMLButtonElement` или `HTMLAnchorElement`. Код, который выводит из них свои типы через `Omit`, должен использовать распределяющий `Omit` (`T extends unknown ? Omit<T, K> : never`).
 
 ### 0.3.0 — snackbar для задач (ломающее изменение)
 

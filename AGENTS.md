@@ -53,6 +53,13 @@ no `overscroll-behavior` on non-scrollable boxes.
   Presence participants (`usePresenceParticipant`).
 - Accessibility: native `<dialog>`/popover semantics, no `role="dialog"`/`aria-modal`, no focus
   traps. Status text goes through `announce()` (one polite region that follows the open modal).
+- Form controls are native elements (`input`, `textarea`, `select`, `input type="checkbox|radio|range"`)
+  with their own semantics; ids come from the prop or `useId()`, hint and error are linked through
+  `aria-describedby`, an error sets `aria-invalid`. `StatusChip` is plain text, not a live region.
+- `aria-disabled` on kit buttons means "busy" (snackbar actions), so a disabled link (`Button`/
+  `IconButton`/`ToggleButton` with `href`) drops `href` and is marked `role="link"`,
+  `aria-disabled="true"` and `data-disabled`; CSS matches `:is(:disabled, [data-disabled])`.
+  `ButtonProps`/`IconButtonProps` are button | link unions: derive types with a distributive `Omit`.
 - Keep `@types/react`/`@types/react-dom` pinned to the same versions as the consumers; two
   copies break JSX types when a consumer links the kit with `npm link`.
 - Packages: `exports` list the condition `m3e-source` (→ `src/`) before `types`/`default` (→ `dist/`).
@@ -75,7 +82,12 @@ no `overscroll-behavior` on non-scrollable boxes.
 ## Verifying motion
 
 Unit tests (vitest, jsdom) cover `Presence`, `animateExit`, the snackbar host (message identity,
-dismissal timer, hover/focus pause, action locking, layout), `announce`, springs and colour generation.
+dismissal timer, hover/focus pause, action locking, layout), `announce`, springs and colour generation,
+and the markup of the 0.4.0 components: button links (`button.test.tsx`: `<a>`, `aria-current`, disabled
+links, unchanged `Segmented`), fields (`field.test.tsx`: labels, ids, `aria-describedby`,
+`aria-invalid`, native `onChange`/`ref`), `Checkbox`/`Radio` (`checkbox.test.tsx`: values,
+`indeterminate` after a click), `Slider` (`slider.test.tsx`: fill share, number `onChange`), `Card`
+and `StatusChip` (`card.test.tsx`, `chip.test.tsx`).
 Exit motion itself must be checked in real engines: build the playground,
 serve `apps/playground/dist`, then sample `getComputedStyle(el).opacity` (and `translate`/`scale`)
 while closing — values strictly between 0 and 1 mid-exit, the element removed afterwards, focus
