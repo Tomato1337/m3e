@@ -1,0 +1,127 @@
+/*
+ * Text inputs (Field.tsx, TextField.tsx, Select.tsx). `.m3e-input` styles any native input,
+ * textarea or select, with or without the components: filled by default, `data-variant='outlined'`
+ * for a 1 px outline. Focus draws a ring with box-shadow; the kit's focus outline stays as a
+ * transparent outline, which forced-colours mode turns into a visible edge.
+ */
+@layer m3e.components {
+  .m3e-input {
+    --m3e-input-container: var(--md-sys-color-surface-container-highest);
+    --m3e-input-content: var(--md-sys-color-on-surface);
+    --m3e-input-radius: var(--md-sys-shape-corner-small);
+    --m3e-input-padding-block: 8px;
+    --m3e-input-padding-inline: 12px;
+    --m3e-input-ring: var(--md-sys-color-primary);
+
+    box-sizing: border-box;
+    inline-size: 100%;
+    min-inline-size: 0;
+    margin: 0;
+    padding: var(--m3e-input-padding-block) var(--m3e-input-padding-inline);
+    border: 0;
+    border-radius: var(--m3e-input-radius);
+    background-color: var(--m3e-input-container);
+    color: var(--m3e-input-content);
+    font-family: var(--md-sys-typescale-body-medium-font);
+    font-size: var(--md-sys-typescale-body-medium-size);
+    line-height: var(--md-sys-typescale-body-medium-line-height);
+    font-weight: var(--md-sys-typescale-body-medium-weight);
+    letter-spacing: var(--md-sys-typescale-body-medium-tracking);
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+
+    /* The select keeps its system arrow. */
+    &:where(input, textarea) { appearance: none; }
+    &:where(textarea) { resize: vertical; }
+    &::placeholder {
+      color: color-mix(in oklab, currentColor 50%, transparent);
+      opacity: 1;
+    }
+
+    &:focus,
+    &:focus-visible {
+      outline-color: transparent;
+      box-shadow: 0 0 0 2px var(--m3e-input-ring);
+    }
+    &[aria-invalid='true'] {
+      --m3e-input-ring: var(--md-sys-color-error);
+      &:where(:not(:focus)) { box-shadow: 0 0 0 1px var(--m3e-input-ring); }
+    }
+
+    &[data-variant='outlined'] {
+      --m3e-input-container: transparent;
+      border: 1px solid var(--md-sys-color-outline);
+      &:focus,
+      &:focus-visible {
+        border-color: var(--m3e-input-ring);
+        box-shadow: 0 0 0 1px var(--m3e-input-ring);
+      }
+      &[aria-invalid='true'] {
+        border-color: var(--m3e-input-ring);
+        &:where(:not(:focus)) { box-shadow: none; }
+      }
+    }
+
+    &:disabled {
+      cursor: default;
+      --m3e-input-content: color-mix(in srgb, var(--md-sys-color-on-surface) var(--m3e-disabled-content-opacity), transparent);
+      --m3e-input-container: color-mix(in srgb, var(--md-sys-color-on-surface) var(--m3e-disabled-container-opacity), transparent);
+      &[data-variant='outlined'] {
+        --m3e-input-container: transparent;
+        border-color: color-mix(in srgb, var(--md-sys-color-on-surface) var(--m3e-disabled-container-opacity), transparent);
+      }
+    }
+
+    /* A list box (select with size > 1 or multiple): content height, rounded options. */
+    &:where(select:is([multiple], [size]:not([size='0'], [size='1']))) {
+      block-size: auto;
+      padding: 4px;
+
+      & option {
+        padding: 4px 8px;
+        border-radius: 4px;
+      }
+    }
+
+    /* Room for TextField's `trailing` content. */
+    &[data-trailing] { padding-inline-end: 40px; }
+  }
+
+  /* Label above, control, hint or error below. */
+  .m3e-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-inline-size: 0;
+
+    & > [data-part='label'] {
+      color: var(--md-sys-color-on-surface-variant);
+      font-family: var(--md-sys-typescale-label-medium-font);
+      font-size: var(--md-sys-typescale-label-medium-size);
+      line-height: var(--md-sys-typescale-label-medium-line-height);
+      font-weight: var(--md-sys-typescale-label-medium-weight);
+      letter-spacing: var(--md-sys-typescale-label-medium-tracking);
+    }
+    & > :is([data-part='hint'], [data-part='error']) {
+      color: var(--md-sys-color-on-surface-variant);
+      font-family: var(--md-sys-typescale-body-small-font);
+      font-size: var(--md-sys-typescale-body-small-size);
+      line-height: var(--md-sys-typescale-body-small-line-height);
+      font-weight: var(--md-sys-typescale-body-small-weight);
+      letter-spacing: var(--md-sys-typescale-body-small-tracking);
+    }
+    & > [data-part='error'] { color: var(--md-sys-color-error); }
+
+    & > [data-part='control'] {
+      position: relative;
+
+      & > [data-part='trailing'] {
+        position: absolute;
+        inset-block: 0;
+        inset-inline-end: 4px;
+        display: flex;
+        align-items: center;
+      }
+    }
+  }
+}

@@ -10,9 +10,11 @@ import {
   MenuItem,
   Presence,
   Segmented,
+  Select,
   Snackbar,
   Spinner,
   Switch,
+  TextField,
   toast,
   ToggleButton,
   usePresence,
@@ -53,6 +55,7 @@ export function App() {
   const [held, setHeld] = useState(false)
   const [editor, setEditor] = useState(false)
   const [page, setPage] = useState<(typeof PAGES)[number]['value']>('lessons')
+  const [secret, setSecret] = useState(false)
 
   useEffect(() => {
     applyVars(schemeVars(seed, { dark }))
@@ -113,6 +116,46 @@ export function App() {
             </ToggleButton>
           ))}
         </ButtonGroup>
+      </section>
+
+      <section aria-labelledby="fields-title">
+        <h2 id="fields-title" className="type-title-large">Поля</h2>
+        <div className="fields">
+          <TextField label="Название колоды" placeholder="English::Movies" hint="Подсказка под полем" />
+          <TextField label="Outlined" variant="outlined" placeholder="Поле с обводкой" />
+          <TextField label="Модель" defaultValue="gpt-5" error="Такой модели нет" />
+          <TextField label="Outlined с ошибкой" variant="outlined" defaultValue="—" error="Введите число" />
+          <TextField label="Недоступно" defaultValue="Только чтение" disabled />
+          <TextField label="Недоступно, outlined" variant="outlined" defaultValue="Только чтение" disabled />
+          <TextField
+            label="Ключ API"
+            type={secret ? 'text' : 'password'}
+            defaultValue="sk-demo-1234"
+            autoComplete="off"
+            trailing={<IconButton icon={secret ? 'visibility_off' : 'visibility'} label={secret ? 'Скрыть ключ' : 'Показать ключ'} size="sm" tipPos="left" onClick={() => setSecret(!secret)} />}
+          />
+          <Select label="Язык" defaultValue="en" hint="Системная стрелка остаётся">
+            <optgroup label="Частые">
+              <option value="en">Английский</option>
+              <option value="de">Немецкий</option>
+            </optgroup>
+            <optgroup label="Другие">
+              <option value="ja">Японский</option>
+              <option value="ko">Корейский</option>
+            </optgroup>
+          </Select>
+          <TextField multiline label="Промпт" rows={3} placeholder="Многострочное поле тянется по вертикали" />
+          <Select label="Модель (список)" size={6} defaultValue="claude">
+            <option value="gpt">gpt-5</option>
+            <option value="gpt-mini">gpt-5-mini</option>
+            <option value="claude">claude-sonnet</option>
+            <option value="gemini">gemini-pro</option>
+            <option value="llama">llama-4</option>
+            <option value="mistral">mistral-large</option>
+            <option value="qwen">qwen-3</option>
+          </Select>
+        </div>
+        <input className="m3e-input search" type="search" placeholder="Поиск по субтитрам" aria-label="Поиск по субтитрам" />
       </section>
 
       <section aria-labelledby="sel-title">
