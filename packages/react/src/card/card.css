@@ -1,0 +1,38 @@
+/*
+ * Card (Card.tsx): filled (surface-container-low, large corners, 16 px) or outlined (1 px
+ * outline-variant, medium corners, 12 px). No elevated variant: the apps have no raised surfaces.
+ */
+@layer m3e.components {
+  .m3e-card {
+    --m3e-card-container: var(--md-sys-color-surface-container-low);
+    --m3e-card-radius: var(--md-sys-shape-corner-large);
+    --m3e-card-padding: 16px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-sizing: border-box;
+    min-inline-size: 0;
+    margin: 0;
+    padding: var(--m3e-card-padding);
+    border-radius: var(--m3e-card-radius);
+    background-color: var(--m3e-card-container);
+
+    &[data-variant='outlined'] {
+      --m3e-card-container: transparent;
+      --m3e-card-radius: var(--md-sys-shape-corner-medium);
+      --m3e-card-padding: 12px;
+      border: 1px solid var(--md-sys-color-outline-variant);
+    }
+
+    & > [data-part='title'] {
+      margin: 0;
+      color: var(--md-sys-color-on-surface);
+      font-family: var(--md-sys-typescale-title-small-font);
+      font-size: var(--md-sys-typescale-title-small-size);
+      line-height: var(--md-sys-typescale-title-small-line-height);
+      font-weight: var(--md-sys-typescale-title-small-weight);
+      letter-spacing: var(--md-sys-typescale-title-small-tracking);
+    }
+  }
+}
