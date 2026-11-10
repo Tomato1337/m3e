@@ -1,6 +1,6 @@
 {
   "name": "@tomato1337/m3e-react",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "type": "module",
   "description": "Material 3 Expressive React components with enter/exit motion, built on native dialog/popover.",
   "license": "MIT",
@@ -32,7 +32,7 @@
     "prepack": "npm run build"
   },
   "dependencies": {
-    "@tomato1337/m3e-tokens": "0.3.0",
+    "@tomato1337/m3e-tokens": "0.4.0",
     "@material-symbols/font-400": "^0.48.2"
   },
   "peerDependencies": {
