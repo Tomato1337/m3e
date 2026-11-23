@@ -40,9 +40,12 @@ describe('sliderFill', () => {
     expect(sliderFill(-0.5, -1, 1)).toBe(0.25)
   })
 
-  it('is 0 when max ≤ min', () => {
+  it('is 0 when max ≤ min or values are non-finite', () => {
     expect(sliderFill(5, 10, 10)).toBe(0)
     expect(sliderFill(5, 10, 0)).toBe(0)
+    expect(sliderFill(Number.NaN, 0, 100)).toBe(0)
+    expect(sliderFill(Number.POSITIVE_INFINITY, 0, 100)).toBe(0)
+    expect(sliderFill(50, Number.NaN, 100)).toBe(0)
   })
 })
 
@@ -76,5 +79,16 @@ describe('Slider', () => {
   it('can be disabled', () => {
     render(<Slider value={20} label="Громкость" disabled onChange={() => {}} />)
     expect(input().disabled).toBe(true)
+  })
+
+  it('sets data-size="md" only for size="md"', () => {
+    render(<Slider value={20} label="Громкость" onChange={() => {}} />)
+    expect(input().hasAttribute('data-size')).toBe(false)
+
+    render(<Slider value={20} size="sm" label="Громкость" onChange={() => {}} />)
+    expect(input().hasAttribute('data-size')).toBe(false)
+
+    render(<Slider value={20} size="md" label="Громкость" onChange={() => {}} />)
+    expect(input().dataset.size).toBe('md')
   })
 })

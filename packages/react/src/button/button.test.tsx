@@ -94,6 +94,29 @@ describe('Button', () => {
     act(() => el('a').click())
     expect(onClick).toHaveBeenCalledOnce()
   })
+
+  it('renders trailingIcon after children on both button and link branches', () => {
+    render(
+      <>
+        <Button icon="play_arrow" trailingIcon="expand_more">Действия</Button>
+        <Button href="/next" size="md" trailingIcon="arrow_forward">Дальше</Button>
+      </>,
+    )
+    const btn = el('button')
+    const btnIcons = btn.querySelectorAll<HTMLElement>('.m3e-icon')
+    expect(btnIcons).toHaveLength(2)
+    expect(btnIcons[0]!.textContent).toBe('play_arrow')
+    expect(btnIcons[0]!.style.fontSize).toBe('20px')
+    expect(btnIcons[1]!.textContent).toBe('expand_more')
+    expect(btnIcons[1]!.style.fontSize).toBe('18px')
+    expect(btn.textContent).toBe('play_arrowДействияexpand_more')
+
+    const a = el('a')
+    const linkIcon = a.querySelector<HTMLElement>('.m3e-icon')!
+    expect(linkIcon.textContent).toBe('arrow_forward')
+    expect(linkIcon.style.fontSize).toBe('22px')
+    expect(a.textContent).toBe('Дальшеarrow_forward')
+  })
 })
 
 describe('IconButton', () => {

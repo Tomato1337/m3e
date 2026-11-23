@@ -5,7 +5,7 @@
 | Пакет | Что внутри |
 | --- | --- |
 | `@tomato1337/m3e-tokens` | CSS-токены (цвет, типографика, формы, тени, состояния, движение) в слое `m3e.tokens`; TS-утилиты: схема из seed-цвета (`schemeVars`), гармонизированные свои цвета (`customColorTones`), пружины M3 Expressive → `linear()` (`springEasing`). |
-| `@tomato1337/m3e-react` | React 19 компоненты: `Dialog`, `Menu`, `Snackbar`/`toast`/`updateToast`, `IconButton`, `Button`, `ButtonGroup`/`ToggleButton`/`Segmented`, `Chip`, `StatusChip`, `Card`, `Switch`, `Checkbox`, `Radio`, `Slider`, поля `Field`/`TextField`/`Select` и класс `.m3e-input`, `Spinner`, `WavyProgress`, `WavySpinner`, `Icon`, тултипы `data-tip`, `Presence`/`usePresence` и классы `m3e-motion-*`. |
+| `@tomato1337/m3e-react` | React 19 компоненты: `Dialog`, `Menu`, `Snackbar`/`toast`/`updateToast`, `IconButton`, `Button`, `ButtonGroup`/`ToggleButton`/`Segmented`, `Chip`, `StatusChip`, `Card`, `Switch`, `Checkbox`, `Radio`, `Slider`, поля `Field`/`TextField`/`Select` и класс `.m3e-input`, `ShapeBadge`/`shapeClip`, `ListGroup`, `Kbd`, `Spinner`, `WavyProgress`, `WavySpinner`, `Icon`, тултипы `data-tip`, `Presence`/`usePresence` и классы `m3e-motion-*`. |
 | `apps/playground` | Витрина всех компонентов и анимаций (`npm run dev`). |
 
 ## Главное: анимации входа **и выхода**
@@ -83,6 +83,14 @@ npm install                                           # вернуть верс�
 Версия — поле `version` в `packages/*/package.json` (у обоих пакетов одна) и git-тег `v<версия>`. Выпуск: поднять версию в обоих `package.json` (и зависимость `@tomato1337/m3e-react` → `@tomato1337/m3e-tokens`), `npm install`, закоммитить, `git tag v0.4.0 && git push origin main v0.4.0`. Workflow `.github/workflows/publish.yml` прогоняет `npm run check` и публикует пакеты через trusted publishing (OIDC, без токена). Ломающие изменения API или токенов до 1.0 — новая минорная версия; в приложении после обновления прогоните `tsc -b` и сборку.
 
 Первую версию нового пакета npm принимает только вручную: `npm login`, затем `npm publish --workspace packages/tokens --workspace packages/react`; после этого на npmjs.com в настройках каждого пакета включается Trusted publishing → GitHub Actions (`Tomato1337/m3e`, `publish.yml`).
+
+### 0.5.0 — бейджи фигур, списки, клавиши и доработки полей/ползунков
+
+Только добавления поверх 0.4.0.
+
+- `ShapeBadge` (фигурные бейджи с `tone`, `icon`, `ringColor`, `shape`: `circle` и `ShapeName`) и расширенный `shapeClip` (`clover8`, `burst12`, `pentagon`).
+- `ListGroup` (группируемый список с шагом 2 px, малыми внутренними и 24 px внешними скруглениями) и `Kbd` (`size`: `'sm' | 'md'`).
+- `Slider`: размер `size="md"` (дорожка 14 px, бегунок 4×36 px), `TextField`: слот `leading` и вариант `variant="pill"`, `Button`: `trailingIcon`.
 
 ### 0.4.0 — поля, флажки, ползунок, карточки, ссылки-кнопки
 

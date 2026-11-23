@@ -1,0 +1,42 @@
+/*
+ * Expressive grouped list (ListGroup.tsx): 2 px separation with tight inner corners and rounded
+ * outer caps; a single-item list matches both :first-child and :last-child for 24 px on all four.
+ */
+@layer m3e.components {
+  .m3e-list-group {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    & > * {
+      border-radius: var(--m3e-list-inner-radius, 4px);
+
+      &:first-child {
+        border-start-start-radius: var(--m3e-list-outer-radius, 24px);
+        border-start-end-radius: var(--m3e-list-outer-radius, 24px);
+      }
+      &:last-child {
+        border-end-start-radius: var(--m3e-list-outer-radius, 24px);
+        border-end-end-radius: var(--m3e-list-outer-radius, 24px);
+      }
+      &:is(:focus-visible, :has(:focus-visible)) {
+        position: relative;
+        z-index: 1;
+      }
+      &:focus-visible {
+        outline-offset: -3px;
+      }
+    }
+  }
+
+  /* Zero specificity so plain row buttons/links inherit the item corners without overriding kit buttons. */
+  :where(.m3e-list-group > li > :is(a, button)) {
+    border-radius: inherit;
+    &:focus-visible {
+      outline-offset: -3px;
+    }
+  }
+}

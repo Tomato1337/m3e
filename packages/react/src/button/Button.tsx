@@ -12,6 +12,8 @@ type ButtonOwnProps = {
   size?: ButtonSize
   /** Leading Material Symbols glyph. */
   icon?: string
+  /** Trailing Material Symbols glyph. */
+  trailingIcon?: string
   /**
    * Toggle state: aria-pressed on a button, aria-current="page" on a link; drawn as the selected
    * shape/colour either way.
@@ -34,11 +36,12 @@ export type ButtonProps = ButtonAsButton | ButtonAsLink
  * toggle (`selected`) takes the squarer selected shape. No tooltip host, so the button itself
  * carries the transitions. With `href` it renders a link with the same look.
  */
-export function Button({ variant = 'filled', size = 'sm', icon, selected, className, children, ...rest }: ButtonProps) {
+export function Button({ variant = 'filled', size = 'sm', icon, trailingIcon, selected, className, children, ...rest }: ButtonProps) {
   const content = (
     <>
       {icon && <Icon name={icon} size={size === 'md' ? 24 : 20} />}
       {children}
+      {trailingIcon && <Icon name={trailingIcon} size={size === 'md' ? 22 : 18} />}
     </>
   )
   if (rest.href !== undefined) {

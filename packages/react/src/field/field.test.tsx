@@ -110,9 +110,51 @@ describe('TextField', () => {
     expect(el('input').getAttribute('aria-label')).toBe('Поиск')
     expect(el('input').dataset.variant).toBeUndefined()
   })
+
+  it('supports leading, leading + trailing, and variant="pill"', () => {
+    render(<TextField aria-label="Поиск" variant="pill" leading={<span data-testid="lead">S</span>} />)
+    const controlOnlyLead = el('[data-part="control"]')
+    expect(controlOnlyLead.querySelector('[data-part="leading"]')?.textContent).toBe('S')
+    expect(controlOnlyLead.querySelector('[data-part="trailing"]')).toBeNull()
+    const pillInput = el('input')
+    expect(pillInput.dataset.variant).toBe('pill')
+    expect(pillInput.hasAttribute('data-leading')).toBe(true)
+    expect(pillInput.hasAttribute('data-trailing')).toBe(false)
+
+    render(
+      <TextField
+        aria-label="Поиск"
+        variant="pill"
+        leading={<span>search</span>}
+        trailing={<button type="button">clear</button>}
+      />,
+    )
+    const control = el('[data-part="control"]')
+    expect(control.querySelector('[data-part="leading"]')?.textContent).toBe('search')
+    expect(control.querySelector('[data-part="trailing"]')?.textContent).toBe('clear')
+    expect(el('input').hasAttribute('data-leading')).toBe(true)
+    expect(el('input').hasAttribute('data-trailing')).toBe(true)
+  })
+
+  it('rejects variant="pill" on multiline at the type level', () => {
+    // @ts-expect-error pill variant is only for single-line TextField
+    const bad = <TextField multiline label="Промпт" variant="pill" />
+    expect(bad).toBeDefined()
+  })
 })
 
 describe('Select', () => {
+  it('supports variant="outlined" and rejects variant="pill" at the type level', () => {
+    render(
+      <Select label="Режим" variant="outlined" defaultValue="a">
+        <option value="a">A</option>
+      </Select>,
+    )
+    expect(el('select').dataset.variant).toBe('outlined')
+    // @ts-expect-error pill variant is not valid on Select
+    const bad = <Select label="Режим" variant="pill" />
+    expect(bad).toBeDefined()
+  })
   it('renders a labelled native select with optgroups and size', () => {
     const ref = createRef<HTMLSelectElement>()
     render(

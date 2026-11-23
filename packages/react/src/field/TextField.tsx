@@ -9,15 +9,16 @@ import {
 import { cx } from '../cx.ts'
 import { Field, fieldErrorId, fieldHintId } from './Field.tsx'
 
-export type InputVariant = 'filled' | 'outlined'
+export type TextVariant = 'filled' | 'outlined'
+export type InputVariant = TextVariant | 'pill'
 
 /** Props shared by TextField and Select: the Field around the control. */
-export type FieldControlProps = {
+export type FieldControlProps<V extends InputVariant = TextVariant> = {
   label?: ReactNode
   hint?: ReactNode
   /** Replaces the hint and sets aria-invalid. */
   error?: ReactNode
-  variant?: InputVariant
+  variant?: V
   /** Class of the Field root; every other attribute goes to the control. */
   className?: string
 }
@@ -26,13 +27,15 @@ type InputProps = Omit<InputHTMLAttributes<HTMLInputElement>, keyof FieldControl
 type TextareaProps = Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, keyof FieldControlProps> & { ref?: Ref<HTMLTextAreaElement> }
 
 export type TextFieldProps =
-  | (FieldControlProps &
+  | (FieldControlProps<InputVariant> &
       InputProps & {
         multiline?: false
+        /** Content at the inline start of the input (e.g. a search icon); the input makes room. */
+        leading?: ReactNode
         /** Content at the inline end of the input (e.g. a "show password" button); the input makes room. */
         trailing?: ReactNode
       })
-  | (FieldControlProps & TextareaProps & { multiline: true; trailing?: undefined })
+  | (FieldControlProps & TextareaProps & { multiline: true; leading?: undefined; trailing?: undefined })
 
 /** Id, description and validity wiring between a control and its Field. */
 export function useFieldControl(
@@ -48,7 +51,7 @@ export function useFieldControl(
     id,
     'aria-describedby': cx(control['aria-describedby'], note) || undefined,
     'aria-invalid': error ? true : control['aria-invalid'],
-    'data-variant': variant === 'outlined' ? variant : undefined,
+    'data-variant': variant === 'filled' ? undefined : variant,
     className: 'm3e-input',
   }
 }
@@ -58,7 +61,7 @@ export function useFieldControl(
  * attribute and `onChange` reach it unchanged; `ref` points at it. Without `label`, name it with
  * `aria-label`.
  */
-export function TextField({ label, hint, error, variant = 'filled', className, multiline, trailing, ...rest }: TextFieldProps) {
+export function TextField({ label, hint, error, variant = 'filled', className, multiline, leading, trailing, ...rest }: TextFieldProps) {
   const wiring = useFieldControl(rest, hint, error, variant)
   const field = { label, hint, error, htmlFor: wiring.id, className }
   if (multiline) {
@@ -68,13 +71,21 @@ export function TextField({ label, hint, error, variant = 'filled', className, m
       </Field>
     )
   }
-  const input = <input {...(rest as InputProps)} {...wiring} data-trailing={trailing ? '' : undefined} />
+  const input = (
+    <input
+      {...(rest as InputProps)}
+      {...wiring}
+      data-leading={leading ? '' : undefined}
+      data-trailing={trailing ? '' : undefined}
+    />
+  )
   return (
     <Field {...field}>
-      {trailing ? (
+      {leading || trailing ? (
         <div data-part="control">
+          {leading && <span data-part="leading">{leading}</span>}
           {input}
-          <span data-part="trailing">{trailing}</span>
+          {trailing && <span data-part="trailing">{trailing}</span>}
         </div>
       ) : (
         input

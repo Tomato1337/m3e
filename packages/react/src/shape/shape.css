@@ -1,0 +1,64 @@
+/*
+ * Expressive shape badge (ShapeBadge.tsx): circle or clipped polygon silhouette.
+ * Tone pairs set --m3e-badge-container / --m3e-badge-content so an app's custom tone overrides
+ * them from a later layer or inline style. The ring layer sits outside at inset: -3px because
+ * clip-path on a host clips box-shadow and oversized children.
+ */
+@layer m3e.components {
+  .m3e-shape-badge {
+    --m3e-badge-container: var(--md-sys-color-primary-container);
+    --m3e-badge-content: var(--md-sys-color-on-primary-container);
+    --m3e-badge-size: 40px;
+
+    position: relative;
+    isolation: isolate;
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    inline-size: var(--m3e-badge-size);
+    block-size: var(--m3e-badge-size);
+    color: var(--m3e-badge-content);
+    vertical-align: middle;
+
+    & > :is([data-part='ring'], [data-part='surface']) {
+      position: absolute;
+      pointer-events: none;
+    }
+    & > [data-part='ring'] {
+      inset: -3px;
+      z-index: -2;
+    }
+    & > [data-part='surface'] {
+      inset: 0;
+      z-index: -1;
+      background-color: var(--m3e-badge-container);
+    }
+
+    &[data-shape='circle'] > :is([data-part='ring'], [data-part='surface']) {
+      border-radius: var(--md-sys-shape-corner-full);
+    }
+
+    &[data-tone='primary'] {
+      --m3e-badge-container: var(--md-sys-color-primary-container);
+      --m3e-badge-content: var(--md-sys-color-on-primary-container);
+    }
+    &[data-tone='secondary'] {
+      --m3e-badge-container: var(--md-sys-color-secondary-container);
+      --m3e-badge-content: var(--md-sys-color-on-secondary-container);
+    }
+    &[data-tone='tertiary'] {
+      --m3e-badge-container: var(--md-sys-color-tertiary-container);
+      --m3e-badge-content: var(--md-sys-color-on-tertiary-container);
+    }
+    &[data-tone='error'] {
+      --m3e-badge-container: var(--md-sys-color-error-container);
+      --m3e-badge-content: var(--md-sys-color-on-error-container);
+    }
+    &[data-tone='neutral'] {
+      --m3e-badge-container: var(--md-sys-color-surface-container-highest);
+      --m3e-badge-content: var(--md-sys-color-on-surface-variant);
+    }
+  }
+}

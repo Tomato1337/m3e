@@ -1,0 +1,32 @@
+/* Keyboard shortcut cap (Kbd.tsx). */
+@layer m3e.components {
+  .m3e-kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    min-inline-size: 22px;
+    padding: 2px 6px;
+    border: 1px solid color-mix(in srgb, var(--md-sys-color-outline) 45%, transparent);
+    border-radius: var(--md-sys-shape-corner-small);
+    background-color: var(--md-sys-color-surface-container-highest);
+    color: var(--md-sys-color-on-surface);
+    font-family: var(--md-sys-typescale-label-medium-font);
+    font-size: var(--md-sys-typescale-label-medium-size);
+    line-height: var(--md-sys-typescale-label-medium-line-height);
+    font-weight: var(--md-sys-typescale-label-medium-weight);
+    letter-spacing: var(--md-sys-typescale-label-medium-tracking);
+    white-space: nowrap;
+    vertical-align: middle;
+
+    &[data-size='md'] {
+      min-inline-size: 26px;
+      padding: 3px 8px;
+      font-family: var(--md-sys-typescale-label-large-font);
+      font-size: var(--md-sys-typescale-label-large-size);
+      line-height: var(--md-sys-typescale-label-large-line-height);
+      font-weight: var(--md-sys-typescale-label-large-weight);
+      letter-spacing: var(--md-sys-typescale-label-large-tracking);
+    }
+  }
+}

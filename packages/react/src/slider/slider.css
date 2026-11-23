@@ -1,7 +1,7 @@
 /*
- * Slider (Slider.tsx) on a native range input. Only ::-webkit-slider-* pseudos: both target
- * engines (WebKit, Chromium) know them. The passed part is a gradient on the track up to
- * --m3e-slider-fill (0…1, written by the component), mirrored for right-to-left.
+ * Slider (Slider.tsx) on a native range input. Separate ::-webkit-slider-* and ::-moz-range-* rules
+ * so WebKit/Chromium do not drop selector lists on unknown pseudos. The passed part is a gradient
+ * on the track up to --m3e-slider-fill (0…1, written by the component), mirrored for right-to-left.
  */
 @layer m3e.components {
   .m3e-slider {
@@ -9,6 +9,7 @@
     --m3e-slider-track: var(--md-sys-color-secondary-container);
     --m3e-slider-fill: 0;
     --m3e-slider-direction: to right;
+    --m3e-slider-stop-pos: right 5px center;
 
     appearance: none;
     display: block;
@@ -21,7 +22,10 @@
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
 
-    &:dir(rtl) { --m3e-slider-direction: to left; }
+    &:dir(rtl) {
+      --m3e-slider-direction: to left;
+      --m3e-slider-stop-pos: left 5px center;
+    }
 
     &::-webkit-slider-runnable-track {
       block-size: 4px;
@@ -41,6 +45,77 @@
       border: 0;
       border-radius: 2px;
       background: var(--m3e-slider-active);
+    }
+
+    &::-moz-range-track {
+      block-size: 4px;
+      border: 0;
+      border-radius: 2px;
+      background: linear-gradient(
+        var(--m3e-slider-direction),
+        var(--m3e-slider-active) calc(var(--m3e-slider-fill) * 100%),
+        var(--m3e-slider-track) calc(var(--m3e-slider-fill) * 100%)
+      );
+    }
+    &::-moz-range-thumb {
+      box-sizing: border-box;
+      inline-size: 4px;
+      block-size: 20px;
+      border: 0;
+      border-radius: 2px;
+      background: var(--m3e-slider-active);
+    }
+
+    &[data-size='md'] {
+      --m3e-slider-gap: 4px;
+      --m3e-slider-thumb-start: calc(var(--m3e-slider-fill) * (100% - 4px));
+      --m3e-slider-stop-size: clamp(0px, (0.96 - var(--m3e-slider-fill)) * 10000px, 4px);
+      --m3e-slider-md-track:
+        radial-gradient(circle, var(--m3e-slider-active) 1.6px, transparent 2px),
+        linear-gradient(
+          var(--m3e-slider-direction),
+          var(--m3e-slider-active) 0,
+          var(--m3e-slider-active) max(0px, calc(var(--m3e-slider-thumb-start) - var(--m3e-slider-gap))),
+          transparent max(0px, calc(var(--m3e-slider-thumb-start) - var(--m3e-slider-gap))),
+          transparent calc(var(--m3e-slider-thumb-start) + 4px + var(--m3e-slider-gap)),
+          var(--m3e-slider-track) calc(var(--m3e-slider-thumb-start) + 4px + var(--m3e-slider-gap)),
+          var(--m3e-slider-track) 100%
+        );
+      block-size: 40px;
+
+      &::-webkit-slider-runnable-track {
+        block-size: 14px;
+        border-radius: 7px;
+        background-color: transparent;
+        background-image: var(--m3e-slider-md-track);
+        background-size: var(--m3e-slider-stop-size) var(--m3e-slider-stop-size), 100% 100%;
+        background-position: var(--m3e-slider-stop-pos), 0 0;
+        background-repeat: no-repeat;
+      }
+      &::-webkit-slider-thumb {
+        inline-size: 4px;
+        block-size: 36px;
+        margin-block-start: -11px;
+        border-radius: 2px;
+        background: var(--m3e-slider-active);
+      }
+
+      &::-moz-range-track {
+        block-size: 14px;
+        border-radius: 7px;
+        background-color: transparent;
+        background-image: var(--m3e-slider-md-track);
+        background-size: var(--m3e-slider-stop-size) var(--m3e-slider-stop-size), 100% 100%;
+        background-position: var(--m3e-slider-stop-pos), 0 0;
+        background-repeat: no-repeat;
+      }
+      &::-moz-range-thumb {
+        inline-size: 4px;
+        block-size: 36px;
+        border: 0;
+        border-radius: 2px;
+        background: var(--m3e-slider-active);
+      }
     }
 
     &:disabled {
