@@ -5,7 +5,7 @@
 | Пакет | Что внутри |
 | --- | --- |
 | `@tomato1337/m3e-tokens` | CSS-токены (цвет, типографика, формы, тени, состояния, движение) в слое `m3e.tokens`; TS-утилиты: схема из seed-цвета (`schemeVars`), гармонизированные свои цвета (`customColorTones`), пружины M3 Expressive → `linear()` (`springEasing`). |
-| `@tomato1337/m3e-react` | React 19 компоненты: `Dialog`, `Menu`, `Snackbar`/`toast`/`updateToast`, `IconButton`, `Button`, `ButtonGroup`/`ToggleButton`/`Segmented`, `Chip`, `StatusChip`, `Card`, `Switch`, `Checkbox`, `Radio`, `Slider`, поля `Field`/`TextField`/`Select` и класс `.m3e-input`, `ShapeBadge`/`shapeClip`, `ListGroup`, `Kbd`, `Spinner`, `WavyProgress`, `WavySpinner`, `Icon`, тултипы `data-tip`, `Presence`/`usePresence` и классы `m3e-motion-*`. |
+| `@tomato1337/m3e-react` | React 19 компоненты: `Dialog`, `Menu`, `Snackbar`/`toast`/`updateToast`, `IconButton`, `Button`, `ButtonGroup`/`ToggleButton`/`Segmented`, `Chip`, `StatusChip`, `Card`, `Switch`, `Checkbox`, `Radio`, `Slider`, поля `Field`/`TextField`/`Select`/`Combobox` и класс `.m3e-input`, `ShapeBadge`/`shapeClip`, `ListGroup`, `Kbd`, `Spinner`, `WavyProgress`, `WavySpinner`, `Icon`, тултипы `data-tip`, `Presence`/`usePresence` и классы `m3e-motion-*`. |
 | `apps/playground` | Витрина всех компонентов и анимаций (`npm run dev`). |
 
 ## Главное: анимации входа **и выхода**
@@ -83,6 +83,15 @@ npm install                                           # вернуть верс�
 Версия — поле `version` в `packages/*/package.json` (у обоих пакетов одна) и git-тег `v<версия>`. Выпуск: поднять версию в обоих `package.json` (и зависимость `@tomato1337/m3e-react` → `@tomato1337/m3e-tokens`), `npm install`, закоммитить, `git tag v0.4.0 && git push origin main v0.4.0`. Workflow `.github/workflows/publish.yml` прогоняет `npm run check` и публикует пакеты через trusted publishing (OIDC, без токена). Ломающие изменения API или токенов до 1.0 — новая минорная версия; в приложении после обновления прогоните `tsc -b` и сборку.
 
 Первую версию нового пакета npm принимает только вручную: `npm login`, затем `npm publish --workspace packages/tokens --workspace packages/react`; после этого на npmjs.com в настройках каждого пакета включается Trusted publishing → GitHub Actions (`Tomato1337/m3e`, `publish.yml`).
+
+### 0.6.0 — `Combobox`, единая высота полей, `rem`-типографика и фикс мерцания в WebKitGTK 2.54
+
+Только добавления и исправления поверх 0.5.0.
+
+- `Combobox`: поисковый селект на `popover="manual"` с группировкой, многословным поиском, порогом `searchable`, произвольным значением (`allowCustom`), нижней кнопкой `action` и IME-безопасным `Enter`.
+- Поля: единая минимальная высота 40 px для однострочных `TextField`, `Select` (с `appearance: none` и шевроном кита) и `Combobox`; контрастный placeholder на `--md-sys-color-on-surface-variant`.
+- Токены и мелкие фиксы: шкала типографики переведена в `rem` с безразмерным `line-height`, `.m3e-chip` использует `min-block-size: 32px`, `.m3e-icon` защищён `font-size-adjust: none`.
+- `Menu` и `Combobox`: вход и `[data-closing]`-выход переведены на `@keyframes`, чтобы WebKitGTK 2.54 с CSS Anchor Positioning не перезапускал transition-анимации при открытии.
 
 ### 0.5.0 — бейджи фигур, списки, клавиши и доработки полей/ползунков
 

@@ -1,7 +1,8 @@
 /*
- * Text inputs (Field.tsx, TextField.tsx, Select.tsx). `.m3e-input` styles any native input,
- * textarea or select, with or without the components: filled by default, `data-variant='outlined'`
- * for a 1 px outline, `data-variant='pill'` on `<input>` for a 44 px full-radius pill field.
+ * Text inputs (Field.tsx, TextField.tsx, Select.tsx, Combobox.tsx). `.m3e-input` styles any native
+ * input, textarea, select or combobox trigger, with or without the components: filled by default,
+ * `data-variant='outlined'` for a 1 px outline, `data-variant='pill'` on `<input>` for a 44 px
+ * full-radius pill field. Single-line controls share a 40 px minimum height across engines.
  * Focus draws a ring with box-shadow; the kit's focus outline stays as a transparent outline,
  * which forced-colours mode turns into a visible edge.
  */
@@ -19,7 +20,7 @@
     min-inline-size: 0;
     margin: 0;
     padding: var(--m3e-input-padding-block) var(--m3e-input-padding-inline);
-    border: 0;
+    border: 1px solid transparent;
     border-radius: var(--m3e-input-radius);
     background-color: var(--m3e-input-container);
     color: var(--m3e-input-content);
@@ -31,12 +32,27 @@
     outline: 2px solid transparent;
     outline-offset: 2px;
 
-    /* The select keeps its system arrow. */
+    /* Single-line inputs, selects and combobox triggers share the same 40 px minimum height. */
+    &:where(input, select:not([multiple]):not([size]:not([size='0'], [size='1'])), button) {
+      min-block-size: 40px;
+    }
+
     &:where(input, textarea) { appearance: none; }
+    &:where(select[data-trailing]) {
+      --m3e-input-trailing-pad: 36px;
+      appearance: none;
+      cursor: pointer;
+      text-overflow: ellipsis;
+    }
+    &:where(select) :is(option, optgroup) {
+      background-color: var(--md-sys-color-surface-container);
+      color: var(--md-sys-color-on-surface);
+    }
     &:where(input[type='search'])::-webkit-search-cancel-button { appearance: none; }
     &:where(textarea) { resize: vertical; }
+    /* M3 uses on-surface-variant for placeholder text so it stays >= 4.5:1 across light and dark surfaces. */
     &::placeholder {
-      color: color-mix(in oklab, currentColor 50%, transparent);
+      color: var(--m3e-input-placeholder, var(--md-sys-color-on-surface-variant));
       opacity: 1;
     }
 
@@ -52,7 +68,7 @@
 
     &[data-variant='outlined'] {
       --m3e-input-container: transparent;
-      border: 1px solid var(--md-sys-color-outline);
+      border-color: var(--md-sys-color-outline);
       &:focus,
       &:focus-visible {
         border-color: var(--m3e-input-ring);
@@ -74,6 +90,7 @@
     &:disabled {
       cursor: default;
       --m3e-input-content: color-mix(in srgb, var(--md-sys-color-on-surface) var(--m3e-disabled-content-opacity), transparent);
+      --m3e-input-placeholder: var(--m3e-input-content);
       --m3e-input-container: color-mix(in srgb, var(--md-sys-color-on-surface) var(--m3e-disabled-container-opacity), transparent);
       &[data-variant='outlined'] {
         --m3e-input-container: transparent;
@@ -83,6 +100,7 @@
 
     /* A list box (select with size > 1 or multiple): content height, rounded options. */
     &:where(select:is([multiple], [size]:not([size='0'], [size='1']))) {
+      min-block-size: 0;
       block-size: auto;
       padding: 4px;
 
@@ -144,6 +162,19 @@
         inset-inline-end: 4px;
         display: flex;
         align-items: center;
+      }
+
+      & > [data-part='chevron'] {
+        position: absolute;
+        inset-block: 0;
+        inset-inline-end: 10px;
+        display: flex;
+        align-items: center;
+        pointer-events: none;
+        color: var(--md-sys-color-on-surface-variant);
+      }
+      &:has(.m3e-input:disabled) > [data-part='chevron'] {
+        color: color-mix(in srgb, var(--md-sys-color-on-surface) var(--m3e-disabled-content-opacity), transparent);
       }
     }
   }

@@ -5,6 +5,7 @@ import {
   Card,
   Checkbox,
   Chip,
+  Combobox,
   Dialog,
   IconButton,
   Menu,
@@ -47,6 +48,14 @@ const SPEEDS = [
   { value: '1', label: 'Обычная' },
   { value: '1.25', label: '1.25×' },
 ] as const
+const DEMO_MODELS = [
+  { value: '', label: 'Как основная' },
+  { value: 'anthropic/claude-haiku-5-5', label: 'claude-haiku-5-5', group: 'Anthropic', hint: 'быстрая' },
+  { value: 'anthropic/claude-sonnet-5-5', label: 'claude-sonnet-5-5', group: 'Anthropic' },
+  { value: 'openai/gpt-5-mini', label: 'gpt-5-mini', group: 'OpenAI' },
+  { value: 'openai/gpt-5', label: 'gpt-5', group: 'OpenAI' },
+  { value: 'openrouter/deepseek-v4', label: 'deepseek-v4', group: 'OpenRouter' },
+] as const
 
 export function App() {
   const [seed, setSeed] = useState('#6750a4')
@@ -68,6 +77,7 @@ export function App() {
   const [secret, setSecret] = useState(false)
   const [cards, setCards] = useState([true, false])
   const [speed, setSpeed] = useState<(typeof SPEEDS)[number]['value']>('1')
+  const [model, setModel] = useState('anthropic/claude-haiku-5-5')
 
   useEffect(() => {
     applyVars(schemeVars(seed, { dark }))
@@ -146,7 +156,7 @@ export function App() {
             autoComplete="off"
             trailing={<IconButton icon={secret ? 'visibility_off' : 'visibility'} label={secret ? 'Скрыть ключ' : 'Показать ключ'} size="sm" tipPos="left" onClick={() => setSecret(!secret)} />}
           />
-          <Select label="Язык" defaultValue="en" hint="Системная стрелка остаётся">
+          <Select label="Язык" defaultValue="en" hint="Одинаковая высота с текстовым полем">
             <optgroup label="Частые">
               <option value="en">Английский</option>
               <option value="de">Немецкий</option>
@@ -156,6 +166,15 @@ export function App() {
               <option value="ko">Корейский</option>
             </optgroup>
           </Select>
+          <Combobox
+            label="Модель с поиском"
+            variant="outlined"
+            hint="Поиск по названию и группе"
+            value={model}
+            options={DEMO_MODELS}
+            allowCustom
+            onChange={setModel}
+          />
           <TextField multiline label="Промпт" rows={3} placeholder="Многострочное поле тянется по вертикали" />
           <Select label="Модель (список)" size={6} defaultValue="claude">
             <option value="gpt">gpt-5</option>

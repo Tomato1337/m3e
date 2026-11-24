@@ -1,0 +1,345 @@
+/*
+ * Combobox (Combobox.tsx): searchable select trigger + top-layer manual popover. Shares `.m3e-input`
+ * height/chrome with TextField and Select; positions via CSS Anchor Positioning when supported and
+ * viewport coordinates from script otherwise (WebKitGTK).
+ */
+@layer m3e.components {
+  .m3e-combobox-trigger {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-align: start;
+    cursor: pointer;
+    --m3e-input-trailing-pad: 36px;
+
+    & > [data-part='value'] {
+      flex: 1;
+      min-inline-size: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+
+      &[data-placeholder] {
+        color: var(--m3e-input-placeholder, var(--md-sys-color-on-surface-variant));
+      }
+    }
+
+    &[aria-expanded='true'] {
+      box-shadow: 0 0 0 2px var(--m3e-input-ring);
+      &[data-variant='outlined'] {
+        border-color: var(--m3e-input-ring);
+        box-shadow: 0 0 0 1px var(--m3e-input-ring);
+      }
+    }
+  }
+
+  .m3e-field > [data-part='control']:has(.m3e-combobox-trigger[aria-expanded='true']) > [data-part='chevron'] > .m3e-icon {
+    rotate: 180deg;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .m3e-field > [data-part='control']:has(.m3e-combobox-trigger) > [data-part='chevron'] > .m3e-icon {
+      transition: rotate var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard);
+    }
+  }
+
+  .m3e-combobox-popover {
+    --m3e-combobox-shift: -4px;
+
+    box-sizing: border-box;
+    min-inline-size: min(var(--m3e-combobox-trigger-width, 200px), calc(100vw - 16px));
+    max-inline-size: min(max(var(--m3e-combobox-trigger-width, 320px), 440px), calc(100vw - 16px));
+    inline-size: max-content;
+    max-block-size: min(360px, 60vh, calc(100vh - 16px));
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--md-sys-color-outline-variant);
+    border-radius: var(--md-sys-shape-corner-medium);
+    background: var(--md-sys-color-surface-container-high);
+    color: var(--md-sys-color-on-surface);
+    box-shadow: var(--md-sys-elevation-level2);
+    overflow: hidden;
+
+    &:popover-open {
+      display: flex;
+      flex-direction: column;
+    }
+
+    &[data-placement='above'] { --m3e-combobox-shift: 4px; }
+    &[data-side='below'] { --m3e-combobox-shift: -4px; }
+    &[data-side='above'] { --m3e-combobox-shift: 4px; }
+    &[data-closing] { pointer-events: none; }
+
+    & > [data-part='search'] {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+      padding: 8px 10px 8px 12px;
+      border-block-end: 1px solid var(--md-sys-color-outline-variant);
+
+      & > .m3e-icon {
+        color: var(--md-sys-color-on-surface-variant);
+        flex-shrink: 0;
+      }
+
+      & > input {
+        appearance: none;
+        flex: 1;
+        min-inline-size: 0;
+        margin: 0;
+        padding: 2px 0;
+        border: 0;
+        background: transparent;
+        color: var(--md-sys-color-on-surface);
+        font-family: var(--md-sys-typescale-body-medium-font);
+        font-size: var(--md-sys-typescale-body-medium-size);
+        line-height: var(--md-sys-typescale-body-medium-line-height);
+        font-weight: var(--md-sys-typescale-body-medium-weight);
+        letter-spacing: var(--md-sys-typescale-body-medium-tracking);
+        outline: none;
+
+        &::placeholder {
+          color: var(--md-sys-color-on-surface-variant);
+          opacity: 1;
+        }
+        &::-webkit-search-cancel-button { appearance: none; }
+      }
+
+      & > [data-part='count'] {
+        flex-shrink: 0;
+        color: var(--md-sys-color-on-surface-variant);
+        font-family: var(--md-sys-typescale-label-small-font);
+        font-size: var(--md-sys-typescale-label-small-size);
+        line-height: var(--md-sys-typescale-label-small-line-height);
+        font-variant-numeric: tabular-nums;
+      }
+
+      & > [data-part='clear'] {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        inline-size: 24px;
+        block-size: 24px;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        border-radius: var(--md-sys-shape-corner-full);
+        background: transparent;
+        color: var(--md-sys-color-on-surface-variant);
+        cursor: pointer;
+
+        &:hover {
+          background: color-mix(in srgb, var(--md-sys-color-on-surface) calc(var(--md-sys-state-hover-state-layer-opacity) * 100%), transparent);
+          color: var(--md-sys-color-on-surface);
+        }
+      }
+    }
+
+    & > [data-part='listbox'] {
+      flex: 1 1 auto;
+      min-block-size: 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      padding: 6px;
+      outline: none;
+    }
+
+    & [data-part='group'] + [data-part='group'],
+    & [data-part='ungrouped'] + [data-part='group'],
+    & [data-part='group'] + [data-part='ungrouped'] {
+      margin-block-start: 6px;
+      padding-block-start: 6px;
+      border-block-start: 1px solid var(--md-sys-color-outline-variant);
+    }
+
+    & [data-part='group-label'] {
+      padding: 4px 10px 4px;
+      color: var(--md-sys-color-on-surface-variant);
+      font-family: var(--md-sys-typescale-label-small-font);
+      font-size: var(--md-sys-typescale-label-small-size);
+      line-height: var(--md-sys-typescale-label-small-line-height);
+      font-weight: 600;
+      letter-spacing: var(--md-sys-typescale-label-small-tracking);
+    }
+
+    & [data-part='empty'] {
+      padding: 16px 12px;
+      text-align: center;
+      color: var(--md-sys-color-on-surface-variant);
+      font-family: var(--md-sys-typescale-body-medium-font);
+      font-size: var(--md-sys-typescale-body-medium-size);
+      line-height: var(--md-sys-typescale-body-medium-line-height);
+    }
+
+    & > [data-part='footer'] {
+      flex-shrink: 0;
+      padding: 6px;
+      border-block-start: 1px solid var(--md-sys-color-outline-variant);
+    }
+  }
+
+  .m3e-combobox-option,
+  .m3e-combobox-action {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-sizing: border-box;
+    inline-size: 100%;
+    min-block-size: 36px;
+    margin: 0;
+    padding: 6px 10px;
+    border: 0;
+    border-radius: var(--md-sys-shape-corner-small);
+    background: transparent;
+    color: var(--md-sys-color-on-surface);
+    text-align: start;
+    font-family: var(--md-sys-typescale-body-medium-font);
+    font-size: var(--md-sys-typescale-body-medium-size);
+    line-height: var(--md-sys-typescale-body-medium-line-height);
+    font-weight: var(--md-sys-typescale-body-medium-weight);
+    letter-spacing: var(--md-sys-typescale-body-medium-tracking);
+    cursor: pointer;
+    user-select: none;
+
+    & > [data-part='label'] {
+      flex: 1;
+      min-inline-size: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    & > [data-part='hint'] {
+      flex-shrink: 0;
+      color: var(--md-sys-color-on-surface-variant);
+      font-family: var(--md-sys-typescale-label-small-font);
+      font-size: var(--md-sys-typescale-label-small-size);
+      line-height: var(--md-sys-typescale-label-small-line-height);
+      letter-spacing: var(--md-sys-typescale-label-small-tracking);
+    }
+
+    & > [data-part='check'] {
+      flex-shrink: 0;
+      color: var(--md-sys-color-primary);
+    }
+
+    &[data-active] {
+      background: color-mix(in srgb, var(--md-sys-color-on-surface) calc(var(--md-sys-state-focus-state-layer-opacity) * 100%), transparent);
+    }
+
+    &[data-selected] {
+      background: var(--md-sys-color-secondary-container);
+      color: var(--md-sys-color-on-secondary-container);
+      font-weight: 500;
+
+      & > [data-part='hint'],
+      & > [data-part='check'] {
+        color: currentColor;
+      }
+
+      &[data-active] {
+        background: color-mix(
+          in srgb,
+          var(--md-sys-color-on-secondary-container) calc(var(--md-sys-state-focus-state-layer-opacity) * 100%),
+          var(--md-sys-color-secondary-container)
+        );
+      }
+    }
+
+    &[data-custom] {
+      color: var(--md-sys-color-primary);
+      font-weight: 500;
+    }
+
+    &[aria-disabled='true'] {
+      cursor: default;
+      color: color-mix(in srgb, var(--md-sys-color-on-surface) var(--m3e-disabled-content-opacity), transparent);
+      background: transparent;
+      & > [data-part='hint'] { color: inherit; }
+    }
+  }
+
+  .m3e-combobox-action {
+    color: var(--md-sys-color-primary);
+    font-weight: 500;
+
+    &:hover,
+    &:focus-visible {
+      background: color-mix(in srgb, var(--md-sys-color-primary) calc(var(--md-sys-state-hover-state-layer-opacity) * 100%), transparent);
+    }
+    &:focus-visible { outline-offset: calc(-1 * var(--m3e-focus-ring-width)); }
+  }
+
+  /* Anchor positioning when supported; script sets fixed viewport coordinates otherwise (WebKit). */
+  @supports (position-area: block-end) {
+    .m3e-combobox-popover {
+      inset: auto;
+      margin-block: 4px;
+      position-area: block-end span-inline-end;
+      position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline;
+
+      &[data-align='end'] { position-area: block-end span-inline-start; }
+      &[data-placement='above'] { position-area: block-start span-inline-end; }
+      &[data-placement='above'][data-align='end'] { position-area: block-start span-inline-start; }
+    }
+  }
+  @supports not (position-area: block-end) {
+    .m3e-combobox-popover {
+      position: fixed;
+      inset: auto;
+      margin: 0;
+    }
+  }
+
+  /*
+   * Enter and `[data-closing]` exit use @keyframes without `transition-property` on the open
+   * popover: WebKitGTK 2.54 with CSS Anchor Positioning repeatedly re-triggers `opacity`/`translate`
+   * transitions on anchor-positioned popovers, causing a multi-frame flicker. Chromium (`overlay:
+   * auto`) keeps discrete top-layer exit transitions on `hidePopover()`.
+   */
+  @media (prefers-reduced-motion: no-preference) {
+    .m3e-combobox-popover:popover-open:where(:not([data-closing])) {
+      animation: m3e-combobox-in var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard-decelerate);
+    }
+    .m3e-combobox-popover[data-closing] {
+      opacity: 0;
+      translate: 0 var(--m3e-combobox-shift);
+      animation: m3e-combobox-out var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard-accelerate) forwards;
+    }
+    @supports (overlay: auto) {
+      .m3e-combobox-popover {
+        opacity: 0;
+        translate: 0 var(--m3e-combobox-shift);
+        transition-property: opacity, translate, display, overlay;
+        transition-duration: var(--md-sys-motion-duration-short3);
+        transition-timing-function: var(--md-sys-motion-easing-standard-accelerate);
+        transition-behavior: allow-discrete;
+      }
+      .m3e-combobox-popover:popover-open:where(:not([data-closing])) {
+        opacity: 1;
+        translate: none;
+      }
+    }
+  }
+}
+
+@keyframes m3e-combobox-in {
+  from {
+    opacity: 0;
+    translate: 0 var(--m3e-combobox-shift);
+  }
+}
+
+@keyframes m3e-combobox-out {
+  from {
+    opacity: 1;
+    translate: none;
+  }
+  to {
+    opacity: 0;
+    translate: 0 var(--m3e-combobox-shift);
+  }
+}

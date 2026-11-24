@@ -47,30 +47,29 @@
     }
   }
 
-  /* Under 150 ms, opacity and a 4 px nudge, only when motion is welcome. */
+  /* Under 150 ms, opacity and a 4 px nudge, only when motion is welcome. Enter and `[data-closing]`
+     exit use @keyframes so WebKitGTK 2.54 does not re-trigger transitions on anchor-positioned popovers. */
   @media (prefers-reduced-motion: no-preference) {
-    .m3e-menu {
+    .m3e-menu:popover-open:where(:not([data-closing])) {
+      animation: m3e-menu-in var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard-decelerate);
+    }
+    .m3e-menu[data-closing] {
       opacity: 0;
       translate: 0 var(--m3e-menu-shift);
-      transition-property: opacity, translate;
-      transition-duration: var(--md-sys-motion-duration-short3);
-      transition-timing-function: var(--md-sys-motion-easing-standard-accelerate);
-    }
-    .m3e-menu:popover-open:where(:not([data-closing])) {
-      opacity: 1;
-      translate: none;
-      transition-duration: var(--md-sys-motion-duration-short2);
-      transition-timing-function: var(--md-sys-motion-easing-standard-decelerate);
-
-      @starting-style {
-        opacity: 0;
-        translate: 0 var(--m3e-menu-shift);
-      }
+      animation: m3e-menu-out var(--md-sys-motion-duration-short3) var(--md-sys-motion-easing-standard-accelerate) forwards;
     }
     @supports (overlay: auto) {
       .m3e-menu {
+        opacity: 0;
+        translate: 0 var(--m3e-menu-shift);
         transition-property: opacity, translate, display, overlay;
+        transition-duration: var(--md-sys-motion-duration-short3);
+        transition-timing-function: var(--md-sys-motion-easing-standard-accelerate);
         transition-behavior: allow-discrete;
+      }
+      .m3e-menu:popover-open:where(:not([data-closing])) {
+        opacity: 1;
+        translate: none;
       }
     }
   }
@@ -146,5 +145,23 @@
       font-weight: var(--md-sys-typescale-label-small-weight);
       letter-spacing: var(--md-sys-typescale-label-small-tracking);
     }
+  }
+}
+
+@keyframes m3e-menu-in {
+  from {
+    opacity: 0;
+    translate: 0 var(--m3e-menu-shift);
+  }
+}
+
+@keyframes m3e-menu-out {
+  from {
+    opacity: 1;
+    translate: none;
+  }
+  to {
+    opacity: 0;
+    translate: 0 var(--m3e-menu-shift);
   }
 }

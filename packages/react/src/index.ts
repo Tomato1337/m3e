@@ -43,6 +43,7 @@ export { Radio, type RadioProps } from './checkbox/Radio.tsx'
 export { Field, fieldErrorId, fieldHintId, type FieldProps } from './field/Field.tsx'
 export { TextField, type FieldControlProps, type InputVariant, type TextFieldProps, type TextVariant } from './field/TextField.tsx'
 export { Select, type SelectProps } from './field/Select.tsx'
+export { Combobox, type ComboboxAction, type ComboboxOption, type ComboboxProps } from './field/Combobox.tsx'
 export { Slider, sliderFill, type SliderProps, type SliderSize } from './slider/Slider.tsx'
 
 export { Spinner } from './progress/Spinner.tsx'

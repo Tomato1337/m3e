@@ -144,18 +144,21 @@ describe('TextField', () => {
 })
 
 describe('Select', () => {
-  it('supports variant="outlined" and rejects variant="pill" at the type level', () => {
+  it('supports variant="outlined", renders a custom chevron on single-line selects, and rejects variant="pill" at the type level', () => {
     render(
       <Select label="Режим" variant="outlined" defaultValue="a">
         <option value="a">A</option>
       </Select>,
     )
-    expect(el('select').dataset.variant).toBe('outlined')
+    const select = el('select')
+    expect(select.dataset.variant).toBe('outlined')
+    expect(select.hasAttribute('data-trailing')).toBe(true)
+    expect(host.querySelector('[data-part="chevron"]')).not.toBeNull()
     // @ts-expect-error pill variant is not valid on Select
     const bad = <Select label="Режим" variant="pill" />
     expect(bad).toBeDefined()
   })
-  it('renders a labelled native select with optgroups and size', () => {
+  it('renders a labelled native select with optgroups and size without the dropdown chevron', () => {
     const ref = createRef<HTMLSelectElement>()
     render(
       <Select ref={ref} label="Модель" hint="Список с прокруткой" size={6} defaultValue="b">
@@ -171,6 +174,8 @@ describe('Select', () => {
     const select = ref.current!
     expect(select).toBe(el('select'))
     expect(select.className).toBe('m3e-input')
+    expect(select.hasAttribute('data-trailing')).toBe(false)
+    expect(host.querySelector('[data-part="chevron"]')).toBeNull()
     expect(select.size).toBe(6)
     expect(select.value).toBe('b')
     expect(select.querySelectorAll('optgroup')).toHaveLength(2)
