@@ -12,7 +12,7 @@ import { cx } from '../cx.ts'
 import { Icon } from '../icon/Icon.tsx'
 import { clearExit } from '../presence/exit.ts'
 import { usePresenceParticipant } from '../presence/Presence.tsx'
-import { closeTopLayer } from '../presence/topLayer.ts'
+import { closeTopLayer, hidePopover, isPopoverOpen, markEscapeConsumed, showPopover } from '../presence/topLayer.ts'
 import { SwitchIndicator } from '../switch/Switch.tsx'
 import { useLatest } from '../useLatest.ts'
 
@@ -115,9 +115,9 @@ export function Menu({ open, onClose, children, label, align = 'start', placemen
       a.style.setProperty('anchor-name', anchorName)
       m.style.setProperty('position-anchor', anchorName)
     }
-    if (!m.matches(':popover-open')) {
+    if (!isPopoverOpen(m)) {
       opener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
-      m.showPopover()
+      showPopover(m)
       place()
       if (lastInput.current === 'keyboard') m.querySelector<HTMLElement>(ITEMS)?.focus()
     }
@@ -140,13 +140,13 @@ export function Menu({ open, onClose, children, label, align = 'start', placemen
       setMounted(false)
       handlers.current.done()
     }
-    if (!m || !m.matches(':popover-open')) {
+    if (!m || !isPopoverOpen(m)) {
       finish()
       return
     }
     if (m.contains(document.activeElement)) trigger()?.focus({ preventScroll: true })
     const ctl = new AbortController()
-    void closeTopLayer(m, () => m.hidePopover(), ctl.signal).then((completed) => {
+    void closeTopLayer(m, () => hidePopover(m), ctl.signal).then((completed) => {
       if (completed) finish()
     })
     return () => ctl.abort()
@@ -166,6 +166,7 @@ export function Menu({ open, onClose, children, label, align = 'start', placemen
       // One level at a time: not the dialog under the menu, not the page's own Escape.
       e.preventDefault()
       e.stopPropagation()
+      markEscapeConsumed(el.current, anchorEl())
       if (el.current?.contains(document.activeElement)) trigger()?.focus({ preventScroll: true })
       handlers.current.onClose()
     }

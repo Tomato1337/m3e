@@ -142,8 +142,22 @@
       min-block-size: 0;
       overflow-y: auto;
       overscroll-behavior: contain;
-      padding: 6px;
+      padding: 6px 6px 8px;
+      scroll-padding-block: 8px 18px;
       outline: none;
+      scrollbar-width: thin;
+      scrollbar-color: var(--md-sys-color-outline) transparent;
+
+      /* Subtle edge fade only on overflowing ends so clipped bottom rows signal scrollability without clipping descenders at rest. */
+      &[data-overflow-bottom]:not([data-overflow-top]) {
+        mask-image: linear-gradient(to bottom, #000 calc(100% - 18px), transparent 100%);
+      }
+      &[data-overflow-top]:not([data-overflow-bottom]) {
+        mask-image: linear-gradient(to bottom, transparent 0, #000 14px);
+      }
+      &[data-overflow-top][data-overflow-bottom] {
+        mask-image: linear-gradient(to bottom, transparent 0, #000 14px, #000 calc(100% - 18px), transparent 100%);
+      }
     }
 
     & [data-part='group'] + [data-part='group'],
@@ -155,13 +169,55 @@
     }
 
     & [data-part='group-label'] {
-      padding: 4px 10px 4px;
+      box-sizing: border-box;
+      min-block-size: 24px;
+      padding: 4px 10px;
       color: var(--md-sys-color-on-surface-variant);
       font-family: var(--md-sys-typescale-label-small-font);
       font-size: var(--md-sys-typescale-label-small-size);
       line-height: var(--md-sys-typescale-label-small-line-height);
       font-weight: 600;
       letter-spacing: var(--md-sys-typescale-label-small-tracking);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+
+      &[data-divider] {
+        position: relative;
+        min-block-size: 37px;
+        padding-block-start: 17px;
+
+        &::before {
+          content: '';
+          position: absolute;
+          inset-inline: 0;
+          inset-block-start: 6px;
+          border-block-start: 1px solid var(--md-sys-color-outline-variant);
+        }
+      }
+    }
+
+    & [data-part='divider'] {
+      position: relative;
+      box-sizing: border-box;
+      block-size: 13px;
+
+      &::before {
+        content: '';
+        position: absolute;
+        inset-inline: 0;
+        inset-block-start: 6px;
+        border-block-start: 1px solid var(--md-sys-color-outline-variant);
+      }
+    }
+
+    &[data-virtual] [data-part='group-label'] {
+      block-size: 24px;
+      &[data-divider] { block-size: 37px; }
+    }
+
+    &[data-virtual] .m3e-combobox-option {
+      block-size: 36px;
     }
 
     & [data-part='empty'] {
@@ -271,6 +327,24 @@
       background: color-mix(in srgb, var(--md-sys-color-primary) calc(var(--md-sys-state-hover-state-layer-opacity) * 100%), transparent);
     }
     &:focus-visible { outline-offset: calc(-1 * var(--m3e-focus-ring-width)); }
+  }
+
+  /* WebKitGTK fallback when scrollbar-color is unsupported (scrollbar-width: thin disables ::-webkit-scrollbar). */
+  @supports not (scrollbar-color: auto) {
+    .m3e-combobox-popover > [data-part='listbox'] {
+      scrollbar-width: auto;
+    }
+    .m3e-combobox-popover > [data-part='listbox']::-webkit-scrollbar {
+      inline-size: 6px;
+      block-size: 6px;
+    }
+    .m3e-combobox-popover > [data-part='listbox']::-webkit-scrollbar-thumb {
+      background: var(--md-sys-color-outline);
+      border-radius: var(--md-sys-shape-corner-full);
+    }
+    .m3e-combobox-popover > [data-part='listbox']::-webkit-scrollbar-track {
+      background: transparent;
+    }
   }
 
   /* Anchor positioning when supported; script sets fixed viewport coordinates otherwise (WebKit). */

@@ -3,6 +3,7 @@ import { act, createRef, useState, type ReactNode } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { Combobox, type ComboboxOption } from './Combobox.tsx'
+import { Dialog } from '../dialog/Dialog.tsx'
 
 declare global {
   var IS_REACT_ACT_ENVIRONMENT: boolean
@@ -249,5 +250,247 @@ describe('Combobox', () => {
     })
     await flush()
     expect(host.querySelector('.m3e-combobox-popover')).toBeNull()
+  })
+
+  it('virtualizes 1,000+ grouped options with bounded DOM rows, search filtering, and keyboard navigation', async () => {
+    const bigOptions: ComboboxOption[] = Array.from({ length: 1000 }, (_, i) => ({
+      value: `grp-${Math.floor(i / 100)}/item-${String(i).padStart(3, '0')}`,
+      label: `Option ${String(i).padStart(3, '0')}`,
+      group: `Group ${Math.floor(i / 100)}`,
+    }))
+    const onSelect = vi.fn()
+    render(<Harness initial="grp-0/item-000" options={bigOptions} onSelect={onSelect} />)
+
+    const trigger = el<HTMLButtonElement>('button.m3e-combobox-trigger')
+    act(() => trigger.click())
+
+    const popover = el('.m3e-combobox-popover')
+    expect(popover.hasAttribute('data-virtual')).toBe(true)
+    const listbox = el('[data-part="listbox"]')
+    const initialOptions = listbox.querySelectorAll('[role="option"]')
+    expect(initialOptions.length).toBeGreaterThan(0)
+    expect(initialOptions.length).toBeLessThan(40)
+    expect(listbox.children.length).toBeLessThan(60)
+    expect(initialOptions[0]!.getAttribute('aria-setsize')).toBe('1000')
+    expect(initialOptions[0]!.getAttribute('aria-posinset')).toBe('1')
+
+    const search = el<HTMLInputElement>('input[role="combobox"]')
+
+    // ArrowUp from index 0 wraps to the last item (999), scrolling it into the rendered window.
+    act(() => {
+      search.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }))
+    })
+    let activeId = search.getAttribute('aria-activedescendant')!
+    expect(document.getElementById(activeId)?.textContent).toContain('Option 999')
+    expect(listbox.querySelectorAll('[role="option"]').length).toBeLessThan(40)
+
+    // PageUp jumps back by 8 items (999 -> 991).
+    act(() => {
+      search.dispatchEvent(new KeyboardEvent('keydown', { key: 'PageUp', bubbles: true }))
+    })
+    activeId = search.getAttribute('aria-activedescendant')!
+    expect(document.getElementById(activeId)?.textContent).toContain('Option 991')
+
+    // PageDown wraps/clamps forward back toward 999, ArrowDown wraps back to 0.
+    act(() => {
+      search.dispatchEvent(new KeyboardEvent('keydown', { key: 'PageDown', bubbles: true }))
+    })
+    activeId = search.getAttribute('aria-activedescendant')!
+    expect(document.getElementById(activeId)?.textContent).toContain('Option 999')
+
+    act(() => {
+      search.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }))
+    })
+    activeId = search.getAttribute('aria-activedescendant')!
+    expect(document.getElementById(activeId)?.textContent).toContain('Option 000')
+
+    // Search filters across all 1,000 items accurately.
+    setInputValue(search, 'Option 742')
+    expect(el('[data-part="count"]').textContent).toBe('1 / 1000')
+    const filtered = listbox.querySelectorAll('[role="option"]')
+    expect(filtered).toHaveLength(1)
+    expect(filtered[0]!.textContent).toContain('Option 742')
+
+    act(() => {
+      search.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
+    })
+    await flush()
+    expect(onSelect).toHaveBeenCalledWith('grp-7/item-742')
+    expect(trigger.textContent).toBe('Option 742')
+
+    // Non-searchable mode supports Home and End on 1,000 virtualized items.
+    render(<Harness key="non-searchable" initial="grp-5/item-500" options={bigOptions} searchable={false} onSelect={onSelect} />)
+    act(() => el<HTMLButtonElement>('button.m3e-combobox-trigger').click())
+    const list2 = el('[data-part="listbox"]')
+    expect(list2.querySelectorAll('[role="option"]').length).toBeLessThan(40)
+    expect(document.getElementById(list2.getAttribute('aria-activedescendant')!)?.textContent).toContain('Option 500')
+
+    act(() => {
+      list2.dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }))
+    })
+    expect(document.getElementById(list2.getAttribute('aria-activedescendant')!)?.textContent).toContain('Option 999')
+
+    act(() => {
+      list2.dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true }))
+    })
+    expect(document.getElementById(list2.getAttribute('aria-activedescendant')!)?.textContent).toContain('Option 000')
+  })
+
+  it('tracks listbox scroll overflow attributes across top, middle, and bottom', () => {
+    render(<Harness />)
+    act(() => el<HTMLButtonElement>('button.m3e-combobox-trigger').click())
+    const list = el('[data-part="listbox"]')
+
+    let scrollTopVal = 0
+    Object.defineProperty(list, 'clientHeight', { configurable: true, get: () => 200 })
+    Object.defineProperty(list, 'scrollHeight', { configurable: true, get: () => 500 })
+    Object.defineProperty(list, 'scrollTop', {
+      configurable: true,
+      get: () => scrollTopVal,
+      set: (v: number) => { scrollTopVal = v },
+    })
+
+    act(() => { list.dispatchEvent(new Event('scroll')) })
+    expect(list.hasAttribute('data-overflow-top')).toBe(false)
+    expect(list.hasAttribute('data-overflow-bottom')).toBe(true)
+
+    scrollTopVal = 120
+    act(() => { list.dispatchEvent(new Event('scroll')) })
+    expect(list.hasAttribute('data-overflow-top')).toBe(true)
+    expect(list.hasAttribute('data-overflow-bottom')).toBe(true)
+
+    scrollTopVal = 300
+    act(() => { list.dispatchEvent(new Event('scroll')) })
+    expect(list.hasAttribute('data-overflow-top')).toBe(true)
+    expect(list.hasAttribute('data-overflow-bottom')).toBe(false)
+  })
+
+  it('closes only Combobox on first Escape inside Dialog (Chromium CloseWatcher & WebKitGTK), and closes Dialog on second Escape', async () => {
+    const openPopovers = new WeakSet<Element>()
+    const nativeMatches = Element.prototype.matches
+    const showModalDesc = Object.getOwnPropertyDescriptor(HTMLDialogElement.prototype, 'showModal')
+    const closeDesc = Object.getOwnPropertyDescriptor(HTMLDialogElement.prototype, 'close')
+    const showPopoverDesc = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'showPopover')
+    const hidePopoverDesc = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'hidePopover')
+    const restoreProp = (proto: object, key: string, desc: PropertyDescriptor | undefined) => {
+      if (desc) Object.defineProperty(proto, key, desc)
+      else Reflect.deleteProperty(proto, key)
+    }
+
+    HTMLDialogElement.prototype.showModal = function (this: HTMLDialogElement) {
+      this.open = true
+    }
+    HTMLDialogElement.prototype.close = function (this: HTMLDialogElement) {
+      this.open = false
+    }
+    HTMLElement.prototype.showPopover = function (this: HTMLElement) {
+      openPopovers.add(this)
+    }
+    HTMLElement.prototype.hidePopover = function (this: HTMLElement) {
+      openPopovers.delete(this)
+    }
+    Element.prototype.matches = function (this: Element, selector: string) {
+      return selector === ':popover-open' ? openPopovers.has(this) : nativeMatches.call(this, selector)
+    } as typeof nativeMatches
+
+    try {
+      const onDialogClose = vi.fn()
+      function DialogWithCombobox() {
+        const [dialogOpen, setDialogOpen] = useState(true)
+        const [val, setVal] = useState('openai/gpt-5-mini')
+        return (
+          <Dialog
+            open={dialogOpen}
+            dismissible
+            label="Настройка"
+            onClose={() => {
+              onDialogClose()
+              setDialogOpen(false)
+            }}
+          >
+            <Combobox label="Модель" value={val} options={OPTIONS} onChange={setVal} />
+          </Dialog>
+        )
+      }
+
+      // Case 1: Chromium CloseWatcher fires dialog cancel on Escape keyup AFTER hidePopover() ran on keydown.
+      render(<DialogWithCombobox />)
+      const dialog = el<HTMLDialogElement>('dialog.m3e-dialog')
+      const trigger = el<HTMLButtonElement>('button.m3e-combobox-trigger')
+      expect(dialog.open).toBe(true)
+      expect(dialog.getAttribute('closedby')).toBe('any')
+
+      act(() => trigger.click())
+      const search = el<HTMLInputElement>('input[role="combobox"]')
+      expect(host.querySelector('.m3e-combobox-popover')).not.toBeNull()
+
+      act(() => {
+        search.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+      })
+      await flush()
+      expect(host.querySelector('.m3e-combobox-popover')).toBeNull()
+      expect(document.activeElement).toBe(trigger)
+
+      let cancel1!: Event
+      act(() => {
+        window.dispatchEvent(new KeyboardEvent('keyup', { key: 'Escape', bubbles: true }))
+        cancel1 = new Event('cancel', { cancelable: true })
+        dialog.dispatchEvent(cancel1)
+      })
+      await flush()
+      expect(cancel1.defaultPrevented).toBe(true)
+      expect(onDialogClose).not.toHaveBeenCalled()
+      expect(dialog.open).toBe(true)
+
+      // Second Escape closes the Dialog.
+      let cancel2!: Event
+      act(() => {
+        dialog.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+        window.dispatchEvent(new KeyboardEvent('keyup', { key: 'Escape', bubbles: true }))
+        cancel2 = new Event('cancel', { cancelable: true })
+        dialog.dispatchEvent(cancel2)
+      })
+      await flush()
+      expect(cancel2.defaultPrevented).toBe(true)
+      expect(onDialogClose).toHaveBeenCalledTimes(1)
+      expect(dialog.open).toBe(false)
+
+      // Case 2: Same-tick cancel while popover is still open + WebKitGTK flow (no cancel on first Escape, second Escape closes Dialog even if popover is still closing).
+      onDialogClose.mockClear()
+      render(<DialogWithCombobox key="webkit-case" />)
+      const dialog2 = el<HTMLDialogElement>('dialog.m3e-dialog')
+      act(() => el<HTMLButtonElement>('button.m3e-combobox-trigger').click())
+      const search2 = el<HTMLInputElement>('input[role="combobox"]')
+
+      // Synchronous cancel before Combobox unmounts is still suppressed.
+      let sameTickCancel!: Event
+      act(() => {
+        sameTickCancel = new Event('cancel', { cancelable: true })
+        dialog2.dispatchEvent(sameTickCancel)
+      })
+      expect(sameTickCancel.defaultPrevented).toBe(true)
+      expect(onDialogClose).not.toHaveBeenCalled()
+
+      act(() => {
+        search2.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+      })
+      await flush()
+      expect(host.querySelector('.m3e-combobox-popover')).toBeNull()
+      expect(dialog2.open).toBe(true)
+
+      act(() => {
+        dialog2.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+        dialog2.dispatchEvent(new Event('cancel', { cancelable: true }))
+      })
+      await flush()
+      expect(onDialogClose).toHaveBeenCalledTimes(1)
+      expect(dialog2.open).toBe(false)
+    } finally {
+      restoreProp(HTMLDialogElement.prototype, 'showModal', showModalDesc)
+      restoreProp(HTMLDialogElement.prototype, 'close', closeDesc)
+      restoreProp(HTMLElement.prototype, 'showPopover', showPopoverDesc)
+      restoreProp(HTMLElement.prototype, 'hidePopover', hidePopoverDesc)
+      Element.prototype.matches = nativeMatches
+    }
   })
 })

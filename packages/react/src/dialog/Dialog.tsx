@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ComponentPr
 import { cx } from '../cx.ts'
 import { clearExit } from '../presence/exit.ts'
 import { usePresenceParticipant } from '../presence/Presence.tsx'
-import { closeTopLayer } from '../presence/topLayer.ts'
+import { closeTopLayer, consumeNestedEscape } from '../presence/topLayer.ts'
 import { mergeRefs, useLatest } from '../useLatest.ts'
 
 export type DialogProps = Omit<ComponentPropsWithoutRef<'dialog'>, 'open' | 'onClose' | 'onCancel' | 'children'> & {
@@ -112,6 +112,7 @@ export function Dialog({ open = true, onClose, dismissible = false, label, onExi
       onCancel={(e) => {
         // Esc / back gesture / closedby light dismiss: animate through the owner instead of closing now.
         if (e.cancelable) e.preventDefault()
+        if (consumeNestedEscape(e.currentTarget)) return
         handlers.current.onClose?.()
       }}
       onClose={() => {

@@ -11,7 +11,7 @@ import {
 import { Icon } from '../icon/Icon.tsx'
 import { clearExit } from '../presence/exit.ts'
 import { usePresenceParticipant } from '../presence/Presence.tsx'
-import { closeTopLayer } from '../presence/topLayer.ts'
+import { closeTopLayer, hidePopover, isPopoverOpen, markEscapeConsumed, showPopover } from '../presence/topLayer.ts'
 import { mergeRefs, useLatest } from '../useLatest.ts'
 import { Field } from './Field.tsx'
 import { useFieldControl, type FieldControlProps } from './TextField.tsx'
@@ -82,30 +82,94 @@ type Section = {
   items: RenderEntry[]
 }
 
+const VIRTUAL_THRESHOLD = 100
+const VIRTUAL_OVERSCAN = 6
+const OPTION_HEIGHT = 36
+const HEADER_HEIGHT = 24
+const HEADER_DIVIDER_HEIGHT = 37
+const DIVIDER_HEIGHT = 13
+const LIST_PAD_TOP = 6
+const LIST_PAD_BOTTOM = 8
+const FALLBACK_VIEWPORT_HEIGHT = 310
+
+type VirtualRow =
+  | { kind: 'header'; key: string; group: string; divider: boolean; height: number }
+  | { kind: 'divider'; key: string; height: number }
+  | { kind: 'option'; key: string; entry: RenderEntry; height: number }
+
 const supportsAnchor = () => typeof CSS !== 'undefined' && typeof CSS.supports === 'function' && CSS.supports('position-area', 'block-end')
 
-function isPopoverOpen(el: HTMLElement): boolean {
-  try {
-    return el.matches(':popover-open')
-  } catch {
-    return el.dataset.open === 'true'
+function buildVirtualRows(sections: readonly Section[]) {
+  const rows: VirtualRow[] = []
+  const offsets: number[] = []
+  const optionRowIndex: number[] = []
+  let y = 0
+
+  for (let sIdx = 0; sIdx < sections.length; sIdx += 1) {
+    const sec = sections[sIdx]!
+    const prevGroup = sIdx > 0 ? sections[sIdx - 1]!.group : undefined
+    const needsDivider = sIdx > 0 && (Boolean(sec.group) || Boolean(prevGroup))
+
+    if (sec.group) {
+      const height = needsDivider ? HEADER_DIVIDER_HEIGHT : HEADER_HEIGHT
+      offsets.push(y)
+      rows.push({ kind: 'header', key: `hdr-${sec.key}`, group: sec.group, divider: needsDivider, height })
+      y += height
+    } else if (needsDivider) {
+      offsets.push(y)
+      rows.push({ kind: 'divider', key: `div-${sec.key}`, height: DIVIDER_HEIGHT })
+      y += DIVIDER_HEIGHT
+    }
+
+    for (const entry of sec.items) {
+      optionRowIndex[entry.flatIndex] = rows.length
+      offsets.push(y)
+      rows.push({
+        kind: 'option',
+        key: `${entry.isCustom ? 'custom' : 'opt'}-${entry.flatIndex}-${entry.value}`,
+        entry,
+        height: OPTION_HEIGHT,
+      })
+      y += OPTION_HEIGHT
+    }
+  }
+
+  return {
+    enabled: rows.length > VIRTUAL_THRESHOLD,
+    rows,
+    offsets,
+    totalHeight: y,
+    optionRowIndex,
   }
 }
 
-function showPopover(el: HTMLElement): void {
-  if (typeof el.showPopover === 'function') {
-    el.showPopover()
-  } else {
-    el.dataset.open = 'true'
+function findStartRow(offsets: readonly number[], rows: readonly VirtualRow[], scrollTop: number): number {
+  let lo = 0
+  let hi = rows.length - 1
+  while (lo < hi) {
+    const mid = (lo + hi) >> 1
+    if (offsets[mid]! + rows[mid]!.height <= scrollTop) lo = mid + 1
+    else hi = mid
   }
+  return lo
 }
 
-function hidePopover(el: HTMLElement): void {
-  if (typeof el.hidePopover === 'function') {
-    el.hidePopover()
-  } else {
-    delete el.dataset.open
+function findEndRow(offsets: readonly number[], rows: readonly VirtualRow[], scrollBottom: number): number {
+  let lo = 0
+  let hi = rows.length - 1
+  while (lo < hi) {
+    const mid = (lo + hi + 1) >> 1
+    if (offsets[mid]! < scrollBottom) lo = mid
+    else hi = mid - 1
   }
+  return lo
+}
+
+function syncScrollCues(list: HTMLElement): void {
+  const overflowTop = list.scrollTop > 1
+  const overflowBottom = list.scrollTop + list.clientHeight < list.scrollHeight - 1
+  list.toggleAttribute('data-overflow-top', overflowTop)
+  list.toggleAttribute('data-overflow-bottom', overflowBottom)
 }
 
 function findEnabledIndex(items: readonly RenderEntry[], start: number, step: 1 | -1): number {
@@ -178,6 +242,8 @@ export function Combobox({
 
   const [query, setQuery] = useState('')
   const [activeIndex, setActiveIndex] = useState(-1)
+  const [scrollTop, setScrollTop] = useState(0)
+  const [viewportHeight, setViewportHeight] = useState(FALLBACK_VIEWPORT_HEIGHT)
 
   const controlRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLButtonElement>(null)
@@ -252,6 +318,30 @@ export function Combobox({
     return { sections: outSections, flat: outFlat, matchedCount: matched.length }
   }, [options, indexed, query, allowCustom, customLabel])
 
+  const virtual = useMemo(() => buildVirtualRows(sections), [sections])
+
+  const virtualWindow = useMemo(() => {
+    if (!virtual.enabled) return null
+    const totalH = virtual.totalHeight
+    const maxTop = Math.max(0, totalH + LIST_PAD_TOP + LIST_PAD_BOTTOM - viewportHeight)
+    const clampedTop = Math.min(Math.max(0, scrollTop), maxTop)
+    const contentTop = Math.max(0, clampedTop - LIST_PAD_TOP)
+    const contentBottom = clampedTop + viewportHeight
+    const start = Math.max(0, findStartRow(virtual.offsets, virtual.rows, contentTop) - VIRTUAL_OVERSCAN)
+    const end = Math.min(
+      virtual.rows.length - 1,
+      findEndRow(virtual.offsets, virtual.rows, contentBottom) + VIRTUAL_OVERSCAN,
+    )
+    const topSpacer = virtual.offsets[start]!
+    const endRow = virtual.rows[end]!
+    const bottomSpacer = Math.max(0, totalH - (virtual.offsets[end]! + endRow.height))
+    return {
+      rows: virtual.rows.slice(start, end + 1),
+      topSpacer,
+      bottomSpacer,
+    }
+  }, [virtual, scrollTop, viewportHeight])
+
   const effectiveActiveIndex = useMemo(() => {
     if (activeIndex >= 0 && activeIndex < flat.length && !flat[activeIndex]!.disabled) return activeIndex
     return findEnabledIndex(flat, 0, 1)
@@ -280,6 +370,7 @@ export function Combobox({
       const selectedIdx = flat.findIndex((o) => !o.isCustom && o.value === value && !o.disabled)
       setActiveIndex(selectedIdx >= 0 ? selectedIdx : findEnabledIndex(flat, 0, 1))
     }
+    setScrollTop(0)
     pendingScroll.current = true
   }
 
@@ -362,19 +453,57 @@ export function Combobox({
     pendingScroll.current = false
     if (effectiveActiveIndex < 0) return
     const list = listboxRef.current
+    if (!list) return
+    if (virtual.enabled) {
+      const rowIdx = virtual.optionRowIndex[effectiveActiveIndex]
+      if (rowIdx === undefined) return
+      const viewH = list.clientHeight > 0 ? list.clientHeight : FALLBACK_VIEWPORT_HEIGHT
+      const row = virtual.rows[rowIdx]!
+      const itemTop = LIST_PAD_TOP + virtual.offsets[rowIdx]!
+      const itemBottom = itemTop + row.height
+      const topPad = 8
+      const bottomPad = 18
+      const curTop = list.scrollTop
+      let nextTop = curTop
+      if (effectiveActiveIndex === 0 && rowIdx === 1 && virtual.rows[0]?.kind === 'header') {
+        nextTop = 0
+      } else if (itemTop < curTop + topPad) {
+        nextTop = Math.max(0, itemTop - topPad)
+      } else if (itemBottom > curTop + viewH - bottomPad) {
+        const maxTop = Math.max(0, virtual.totalHeight + LIST_PAD_TOP + LIST_PAD_BOTTOM - viewH)
+        nextTop = Math.min(maxTop, itemBottom - (viewH - bottomPad))
+      }
+      if (Math.abs(nextTop - curTop) >= 1) list.scrollTop = nextTop
+      const actualTop = list.clientHeight > 0 ? list.scrollTop : nextTop
+      setScrollTop((prev) => (Math.abs(prev - actualTop) >= 1 ? actualTop : prev))
+      return
+    }
     const node = document.getElementById(optionId(effectiveActiveIndex))
-    if (!list || !node) return
+    if (!node) return
     const lr = list.getBoundingClientRect()
     const nr = node.getBoundingClientRect()
     if (lr.height === 0) return
-    const pad = 6
-    if (nr.top < lr.top + pad) {
-      list.scrollTop -= lr.top + pad - nr.top
-    } else if (nr.bottom > lr.bottom - pad) {
-      list.scrollTop += nr.bottom - (lr.bottom - pad)
+    const topPad = 8
+    const bottomPad = list.scrollTop + list.clientHeight < list.scrollHeight - 1 ? 18 : 8
+    if (nr.top < lr.top + topPad) {
+      list.scrollTop -= lr.top + topPad - nr.top
+    } else if (nr.bottom > lr.bottom - bottomPad) {
+      list.scrollTop += nr.bottom - (lr.bottom - bottomPad)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- optionId is deterministic per render
-  }, [want, effectiveActiveIndex, query])
+  }, [want, effectiveActiveIndex, query, virtual])
+
+  // Sync listbox overflow edge affordances and measured viewport height for virtualization.
+  useLayoutEffect(() => {
+    if (!want) return
+    const list = listboxRef.current
+    if (!list) return
+    syncScrollCues(list)
+    if (virtual.enabled && list.clientHeight > 0) {
+      const ch = list.clientHeight
+      setViewportHeight((prev) => (prev !== ch ? ch : prev))
+    }
+  }, [want, virtual, query, scrollTop])
 
   // Close with exit animation; return focus before hiding when still inside the popover.
   useEffect(() => {
@@ -387,6 +516,7 @@ export function Combobox({
     const finish = () => {
       setMounted(false)
       setQuery('')
+      setScrollTop(0)
       handlers.current.done()
     }
     if (!m || !isPopoverOpen(m)) {
@@ -413,6 +543,7 @@ export function Combobox({
       if (e.key !== 'Escape') return
       e.preventDefault()
       e.stopPropagation()
+      markEscapeConsumed(popoverRef.current, controlRef.current)
       close(true)
     }
     let raf = 0
@@ -421,12 +552,25 @@ export function Combobox({
       cancelAnimationFrame(raf)
       raf = requestAnimationFrame(place)
     }
+    const list = listboxRef.current
+    const ro =
+      list && typeof ResizeObserver !== 'undefined'
+        ? new ResizeObserver(() => {
+            syncScrollCues(list)
+            if (list.clientHeight > 0) {
+              const ch = list.clientHeight
+              setViewportHeight((prev) => (prev !== ch ? ch : prev))
+            }
+          })
+        : null
+    if (list && ro) ro.observe(list)
     document.addEventListener('pointerdown', onDown, true)
     document.addEventListener('keydown', onKey, true)
     window.addEventListener('resize', onMove)
     window.addEventListener('scroll', onMove, true)
     return () => {
       cancelAnimationFrame(raf)
+      ro?.disconnect()
       document.removeEventListener('pointerdown', onDown, true)
       document.removeEventListener('keydown', onKey, true)
       window.removeEventListener('resize', onMove)
@@ -493,7 +637,56 @@ export function Combobox({
     setQuery(next)
     // Reset to top matching option on every query edit.
     setActiveIndex(0)
+    setScrollTop(0)
     if (listboxRef.current) listboxRef.current.scrollTop = 0
+  }
+
+  const onListboxScroll = () => {
+    const list = listboxRef.current
+    if (!list) return
+    syncScrollCues(list)
+    if (virtual.enabled) {
+      const nextTop = list.scrollTop
+      setScrollTop((prev) => (Math.abs(prev - nextTop) >= 1 ? nextTop : prev))
+    }
+  }
+
+  const renderOption = (entry: RenderEntry, setSize?: number) => {
+    const isSelected = !entry.isCustom && entry.value === value
+    const isActive = entry.flatIndex === effectiveActiveIndex && !entry.disabled
+    return (
+      <div
+        key={`${entry.isCustom ? 'custom' : 'opt'}-${entry.flatIndex}-${entry.value}`}
+        id={optionId(entry.flatIndex)}
+        role="option"
+        aria-selected={isSelected}
+        aria-disabled={entry.disabled || undefined}
+        aria-setsize={setSize}
+        aria-posinset={setSize !== undefined ? entry.flatIndex + 1 : undefined}
+        data-selected={isSelected ? '' : undefined}
+        data-active={isActive ? '' : undefined}
+        data-custom={entry.isCustom ? '' : undefined}
+        className="m3e-combobox-option"
+        onPointerMove={() => {
+          if (!entry.disabled && activeIndex !== entry.flatIndex) setActiveIndex(entry.flatIndex)
+        }}
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={() => {
+          if (!entry.disabled) selectValue(entry.value)
+        }}
+      >
+        {entry.isCustom && <Icon name="add" size={18} />}
+        <span data-part="label">
+          {entry.label}
+        </span>
+        {entry.hint && <span data-part="hint">{entry.hint}</span>}
+        {isSelected && (
+          <span data-part="check" aria-hidden="true">
+            <Icon name="check" size={18} />
+          </span>
+        )}
+      </div>
+    )
   }
 
   const activeEntry = effectiveActiveIndex >= 0 ? flat[effectiveActiveIndex] : undefined
@@ -532,6 +725,7 @@ export function Combobox({
             popover="manual"
             data-align={align}
             data-placement={placement}
+            data-virtual={virtual.enabled ? '' : undefined}
             className="m3e-combobox-popover"
           >
             {showSearch && (
@@ -585,48 +779,40 @@ export function Combobox({
               aria-activedescendant={!showSearch ? activeOptionId : undefined}
               tabIndex={showSearch ? undefined : -1}
               data-part="listbox"
+              onScroll={onListboxScroll}
               onKeyDown={showSearch ? undefined : onPopoverKeyDown}
             >
               {sections.length === 0 ? (
                 <div data-part="empty">{emptyText}</div>
+              ) : virtualWindow ? (
+                <>
+                  {virtualWindow.topSpacer > 0 && (
+                    <div role="presentation" aria-hidden="true" style={{ blockSize: `${virtualWindow.topSpacer}px` }} />
+                  )}
+                  {virtualWindow.rows.map((row) => {
+                    if (row.kind === 'header') {
+                      return (
+                        <div
+                          key={row.key}
+                          role="presentation"
+                          data-part="group-label"
+                          data-divider={row.divider ? '' : undefined}
+                        >
+                          {row.group}
+                        </div>
+                      )
+                    }
+                    if (row.kind === 'divider') {
+                      return <div key={row.key} role="presentation" data-part="divider" />
+                    }
+                    return renderOption(row.entry, flat.length)
+                  })}
+                  {virtualWindow.bottomSpacer > 0 && (
+                    <div role="presentation" aria-hidden="true" style={{ blockSize: `${virtualWindow.bottomSpacer}px` }} />
+                  )}
+                </>
               ) : (
                 sections.map((sec, sIdx) => {
-                  const renderOption = (entry: RenderEntry) => {
-                    const isSelected = !entry.isCustom && entry.value === value
-                    const isActive = entry.flatIndex === effectiveActiveIndex && !entry.disabled
-                    return (
-                      <div
-                        key={`${entry.isCustom ? 'custom' : 'opt'}-${entry.flatIndex}-${entry.value}`}
-                        id={optionId(entry.flatIndex)}
-                        role="option"
-                        aria-selected={isSelected}
-                        aria-disabled={entry.disabled || undefined}
-                        data-selected={isSelected ? '' : undefined}
-                        data-active={isActive ? '' : undefined}
-                        data-custom={entry.isCustom ? '' : undefined}
-                        className="m3e-combobox-option"
-                        onPointerMove={() => {
-                          if (!entry.disabled && activeIndex !== entry.flatIndex) setActiveIndex(entry.flatIndex)
-                        }}
-                        onMouseDown={(e) => e.preventDefault()}
-                        onClick={() => {
-                          if (!entry.disabled) selectValue(entry.value)
-                        }}
-                      >
-                        {entry.isCustom && <Icon name="add" size={18} />}
-                        <span data-part="label">
-                          {entry.label}
-                        </span>
-                        {entry.hint && <span data-part="hint">{entry.hint}</span>}
-                        {isSelected && (
-                          <span data-part="check" aria-hidden="true">
-                            <Icon name="check" size={18} />
-                          </span>
-                        )}
-                      </div>
-                    )
-                  }
-
                   if (sec.group) {
                     const headingId = groupLabelId(sIdx)
                     return (
@@ -634,13 +820,13 @@ export function Combobox({
                         <div id={headingId} data-part="group-label">
                           {sec.group}
                         </div>
-                        {sec.items.map(renderOption)}
+                        {sec.items.map((entry) => renderOption(entry))}
                       </div>
                     )
                   }
                   return (
                     <div key={sec.key} data-part="ungrouped">
-                      {sec.items.map(renderOption)}
+                      {sec.items.map((entry) => renderOption(entry))}
                     </div>
                   )
                 })
