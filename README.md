@@ -84,6 +84,11 @@ npm install                                           # вернуть верс�
 
 Первую версию нового пакета npm принимает только вручную: `npm login`, затем `npm publish --workspace packages/tokens --workspace packages/react`; после этого на npmjs.com в настройках каждого пакета включается Trusted publishing → GitHub Actions (`Tomato1337/m3e`, `publish.yml`).
 
+### 0.6.1 — защита `Escape` во вложенном `Dialog` и виртуализация `Combobox`
+
+- Вложенные `Dialog` + `Combobox`/`Menu`: один `Escape` закрывает только верхний слой (`topLayer.ts`), без закрытия родительского диалога (Chromium `CloseWatcher` и WebKitGTK).
+- `Combobox`: виртуализация списков от 100 пунктов (`VIRTUAL_THRESHOLD = 100`), тонкий скроллбар и маски прокрутки сверху/снизу (`combobox.css`).
+
 ### 0.6.0 — `Combobox`, единая высота полей, `rem`-типографика и фикс мерцания в WebKitGTK 2.54
 
 Только добавления и исправления поверх 0.5.0.
